@@ -4,8 +4,9 @@
     <div class="error_wrap">
       <div class="header">
         <span>알림</span>
-        <button @click="isOpenToggle()">x</button>
+        <button @click="isOpenToggle()">X</button>
       </div>
+      <div class="divider"></div>
       <div class="content">
         {{ message }}
       </div>
@@ -14,56 +15,35 @@
       </div>
     </div>
   </div>
-  
+
+  <h1 class="join">회원가입</h1>
+
   <form @submit.prevent="checkForm">
     <div class="form-group">
-      <label for="username">닉네임</label>
-      <input
-        type="text"
-        ref="username"
-        placeholder="닉네임"
-        id="username"
-        v-model="formData.username"
-      />
+      <label for="username">이름</label>
+      <input type="text" ref="username" placeholder="이름" id="username" v-model="formData.username" />
     </div>
     <div class="form-group">
       <label for="email">이메일</label>
-      <input
-        type="text"
-        ref="email"
-        placeholder="이메일"
-        id="email"
-        v-model="formData.email"
-      />
+      <input type="text" ref="email" placeholder="이메일" id="email" v-model="formData.email" />
     </div>
     <div class="form-group">
       <label for="password">비밀번호</label>
-      <input
-        type="password"
-        ref="password"
-        placeholder="비밀번호"
-        id="password"
-        v-model="formData.password"
-      />
+      <input type="password" ref="password" placeholder="비밀번호" id="password" v-model="formData.password" />
     </div>
     <div class="form-group">
       <label for="confirm-password">비밀번호 확인</label>
-      <input
-        type="password"
-        placeholder="비밀번호 확인"
-        id="confirm-password"
-        ref="confirmPassword"
-        v-model="confirmPasswordChk"
-      />
+      <input type="password" placeholder="비밀번호 확인" id="confirm-password" ref="confirmPassword"
+        v-model="confirmPasswordChk" />
     </div>
     <div class="control">
       <div class="custom-control">
-        <input type="checkbox" id="agreement-1" value="1" v-model="service_agree"/>
+        <input type="checkbox" id="agreement-1" value="1" v-model="service_agree" />
         <label for="agreement-1">서비스 약관에 동의합니다.</label>
         <a href="#" target="_blank">내용보기</a>
       </div>
       <div class="custom-control">
-        <input type="checkbox" id="agreement-2" value="2"  v-model="privacy_agree"/>
+        <input type="checkbox" id="agreement-2" value="2" v-model="privacy_agree" />
         <label for="agreement-2">개인정보 수집 및 이용에 동의합니다. </label>
         <a href="#" target="_blank">내용보기</a>
       </div>
@@ -106,10 +86,10 @@ const isValidEmail = (email) => {
 }
 
 const errMsg = () => {
-    isOpen.value = false;
-    if(eleRef.value){
-        eleRef.value.value.focus();
-    }
+  isOpen.value = false;
+  if (eleRef.value) {
+    eleRef.value.value.focus();
+  }
 }
 
 const checkForm = () => {
@@ -123,17 +103,17 @@ const checkForm = () => {
     isOpenToggle();
     eleRef.value = email;
     return;
-  } else if(formData.value.password.length === 0){
+  } else if (formData.value.password.length === 0) {
     message.value = '비밀번호를 정확히 입력해주세요.'
     isOpenToggle();
     eleRef.value = password;
     return;
-  }else if (formData.value.password !== confirmPasswordChk.value) {
+  } else if (formData.value.password !== confirmPasswordChk.value) {
     message.value = '비밀번호가 일치하지 않습니다.\n 다시 입력해 주세요.'
     isOpenToggle();
     eleRef.value = confirmPassword;
     return;
-  }else if (!service_agree.value || !privacy_agree.value) {
+  } else if (!service_agree.value || !privacy_agree.value) {
     message.value = '약관에 동의해 주세요.'
     isOpenToggle();
     eleRef.value = null;
@@ -147,19 +127,19 @@ const checkForm = () => {
 <style>
 @font-face {
   font-family: "GongGothicMedium";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
-    format("woff");
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
+/* 에러 출력 창 */
 .error_msg {
   display: none;
   position: fixed;
-  top: 30%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 300px;
+  width: 400px;
   background: #fff;
   border-radius: 10px;
   padding: 20px;
@@ -168,6 +148,14 @@ const checkForm = () => {
 }
 
 .error_msg.open {
+  display: flex;
+  flex-direction: column;
+}
+
+.header,
+.divider,
+.content,
+.btn_wrap {
   display: block;
 }
 
@@ -176,53 +164,123 @@ const checkForm = () => {
 }
 
 .header {
+  order: -1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 30px;
 }
 
 .header span {
-  font-family: "GongGothicMedium"; /* 글꼴 적용 */
-  flex: 1; /* "알림" 텍스트가 왼쪽에 정렬되도록 */
+  font-family: "GongGothicMedium";
+  /* flex: 1;  */
 }
 
 .header button {
-  flex: 1; /* X 버튼이 오른쪽에 정렬되도록 */
+  font-family: "GongGothicMedium";
+  /* flex: 1;  */
+  margin-left: 10px;
 }
 
 .btn_wrap button {
-  border: 2px solid #ccc; /* 버튼에 테두리 추가 */
-  border-radius: 5px; /* 버튼의 테두리 모서리를 둥글게 만듭니다. */
-  padding: 5px 10px; /* 버튼 내부의 여백을 조정합니다. */
-  background-color: transparent; /* 배경색을 투명하게 설정합니다. */
-  cursor: pointer; /* 마우스 포인터를 손가락 모양으로 변경하여 버튼임을 나타냅니다. */
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  padding: 5px 10px;
+  background-color: transparent;
+  cursor: pointer;
 }
 
 .btn_wrap button:hover {
-  background-color: #f0f0f0; /* 마우스를 올렸을 때 버튼의 배경색을 변경합니다. */
+  font-family: "GongGothicMedium";
+  background-color: #f0f0f0;
+}
+
+.join {
+  font-family: "GongGothicMedium";
 }
 
 .content {
-  font-family: "GongGothicMedium"; /* 글꼴 적용 */
+  margin-top: 25px;
+  margin-bottom: 25px;
+  font-family: "GongGothicMedium";
 }
 
 .btn_wrap {
-  border: 2px solid #ccc; /* 테두리 추가 */
-  border-radius: 5px; /* 테두리의 모서리를 둥글게 만듭니다. */
-  padding: 5px 10px; /* 내부 여백 조정 */
-  margin-top: 10px; /* 위쪽 마진 추가 */
+  font-family: "GongGothicMedium";
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .btn_wrap button {
-  border: none; /* 버튼의 기본 테두리 제거 */
-  padding: 5px 10px; /* 버튼 내부의 여백을 조정합니다. */
-  cursor: pointer; /* 마우스 포인터를 손가락 모양으로 변경하여 버튼임을 나타냅니다. */
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
 }
 
-.btn_wrap button:hover {
-  background-color: #f0f0f0; /* 마우스를 올렸을 때 버튼의 배경색을 변경합니다. */
+.form-group input[type="text"],
+.form-group input[type="password"] {
+  font-family: "GongGothicMedium";
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  padding: 5px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px;
 }
 
+.form-group input[type="text"]:focus,
+.form-group input[type="password"]:focus {
+  font-family: "GongGothicMedium";
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-group label {
+  font-family: "GongGothicMedium";
+  display: block;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.control .custom-control {
+  font-family: "GongGothicMedium";
+  display: flex;
+  align-items: center;
+}
+
+.control .custom-control input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.control .custom-control label {
+  font-family: "GongGothicMedium";
+  flex: 1;
+  text-align: left;
+}
+
+.submit {
+  font-family: "GongGothicMedium";
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.submit:hover {
+  font-family: "GongGothicMedium";
+  background-color: #ccc;
+  color: black;
+}
+
+.divider {
+  border: 1px solid #ccc;
+  margin: 30px 0;
+}
 </style>
-
