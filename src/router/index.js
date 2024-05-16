@@ -30,6 +30,11 @@ const router = createRouter({
           // beforeEnter: onlyAuthUser,
           component: () => import("@/components/users/UserMyPage.vue"),
         },
+        {
+          path: "spotdetail",
+          name: "spot-detail",
+          component: () => import("@/components/spot_detail/SpotDetail.vue"),
+        }
       ]
     }
   ]

@@ -7,6 +7,7 @@
     <router-link :to="{ name: 'user-login' }">로그인</router-link>
     <router-link :to="{ name: 'user-join' }">회원가입</router-link>
     <router-link :to="{ name: 'user-mypage' }">마이페이지</router-link>
+    <router-link :to="{ name: 'spot-detail' }">여행지 상세보기</router-link>
   </div>
 </template>
 
