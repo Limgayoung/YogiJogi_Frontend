@@ -44,16 +44,25 @@ const deleteMarker = () => {
 
 
 <template>
-    <KakaoMap width="100%" height="50rem" :lat="33.452" :lng="126.573">
-        <KakaoMapMarkerPolyline :markerList="markerList" :showMarkerOrder="true" strokeColor="#C74C5E"
-            :strokeOpacity="1" strokeStyle="shortdot" />
-
-        <KakaoMapMarker :lat="33.450705" :lng="126.570667" :image="newImage" @onClickKakaoMapMarker="onClickKakaoMapMarker" :clickable="true"
-         />         
-    </KakaoMap>
-
     <div>
-        <button class="demo-button" @click="addMarker">마커 추가하기</button>
-        <button class="demo-button" @click="deleteMarker">마커 삭제하기</button>
+        <KakaoMap width="100%" height="80rem" :lat="33.452" :lng="126.573">
+            <KakaoMapMarkerPolyline :markerList="markerList" :showMarkerOrder="true" strokeColor="#C74C5E"
+                :strokeOpacity="1" strokeStyle="shortdot" />
+
+            <KakaoMapMarker :lat="33.450705" :lng="126.570667" :image="newImage"
+                @onClickKakaoMapMarker="onClickKakaoMapMarker" :clickable="true" />
+        </KakaoMap>
+
+        <div>
+            <button class="demo-button" @click="addMarker">마커 추가하기</button>
+            <button class="demo-button" @click="deleteMarker">마커 삭제하기</button>
+        </div>
     </div>
 </template>
+
+<style scoped>
+div{
+    width: 100%;
+    height: 100%;
+}
+</style>
