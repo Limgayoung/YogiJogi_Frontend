@@ -1,10 +1,13 @@
 <template>
-  <div>
-    <v-img
+  <div class="container">
+    <!-- <v-img
       class="mx-auto my-6"
       max-width="228"
       src="https://cdn.vuetifyjs.com/docs/images/logos/vuetify-logo-v3-slim-text-light.svg"
-    ></v-img>
+    ></v-img> -->
+    <div class="text-center mb-4">
+      <div class="login-text">로그인</div>
+    </div>
 
     <v-card
       class="mx-auto pa-12 pb-8"
@@ -48,27 +51,22 @@
         @click:append-inner="visible = !visible"
       ></v-text-field>
 
-      <v-card class="mb-12" color="surface-variant" variant="tonal">
+      <!-- <v-card class="mb-12" color="surface-variant" variant="tonal">
         <v-card-text class="text-medium-emphasis text-caption">
           Warning: After 3 consecutive failed login attempts, you account will
           be temporarily locked for three hours. If you must login now, you can
           also click "Forgot login password?" below to reset the login password.
         </v-card-text>
-      </v-card>
+      </v-card> -->
 
       <v-btn class="mb-8" color="blue" size="large" variant="tonal" block>
         로그인
       </v-btn>
 
       <v-card-text class="text-center">
-        <a
-          class="text-blue text-decoration-none"
-          href="#"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
+        <router-link to="/join" class="text-blue text-decoration-none">
           회원가입 <v-icon icon="mdi-chevron-right"></v-icon>
-        </a>
+        </router-link>
       </v-card-text>
     </v-card>
   </div>
@@ -90,12 +88,21 @@ export default {
   font-weight: normal;
   font-style: normal;
 }
-
+.container {
+  font-family: "GongGothicMedium";
+}
 /* 원하는 요소에 폰트를 적용합니다. */
 .text-subtitle-1,
 .text-blue,
 .font-gothic-medium,
-.text-caption {
+.text-caption, 
+.container,
+.login-text {
   font-family: "GongGothicMedium";
+}
+
+.login-text{
+margin-top: 15px;
+font-size: 50px;
 }
 </style>

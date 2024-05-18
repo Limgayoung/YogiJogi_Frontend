@@ -1,10 +1,5 @@
-<script setup>
-import { RouterView } from "vue-router";
-</script>
-
 <template>
-
-    <h1>메인</h1>
+    <div>
     <!-- carousel -->
     <v-carousel height="400" width="100%" cycle hide-delimiter-background>
         <v-carousel-item v-for="(slide, i) in slides" :key="i">
@@ -16,7 +11,6 @@ import { RouterView } from "vue-router";
         </v-carousel-item>
         <button class="detail-button" @click="viewDetails(slides.length - 1)">자세히 보기</button>
     </v-carousel>
-    <router-link to="/user">유저 페이지로 이동</router-link>
 
     <!-- 지역 선택지 -->
     <v-item-group mandatory>
@@ -45,7 +39,7 @@ import { RouterView } from "vue-router";
 
         <v-row class="centered">
             <v-col cols="12" >
-                <h3 class="custom-heading">인기 여행 코스</h3><br>
+                <h3 class="custom-heading">🔥인기 여행 코스</h3><br>
             </v-col>
             <v-col v-for="(card, index) in cards" :key="index" cols="12" sm="6" md="4" lg="3" class="my-col">
                 <v-hover v-slot="{ isHovering, props }">
@@ -70,7 +64,7 @@ import { RouterView } from "vue-router";
             </v-col>
 
             <v-col cols="12">
-                <h3 class="custom-heading">인기 여행지</h3><br>
+                <h3 class="custom-heading">🔥인기 여행지</h3><br>
             </v-col>
             <v-col v-for="(card, index) in cards" :key="index" cols="12" sm="6" md="4" lg="3" class="my-col">
                 <v-hover v-slot="{ isHovering, props }">
@@ -94,7 +88,7 @@ import { RouterView } from "vue-router";
             </v-col>
 
             <v-col cols="12">
-                <h3 class="custom-heading">인기글</h3><br>
+                <h3 class="custom-heading">🔥인기글</h3><br>
             </v-col>
             <v-col v-for="(card, index) in cards" :key="index" cols="12" sm="6" md="4" lg="3" class="my-col">
                 <v-hover v-slot="{ isHovering, props }">
@@ -119,12 +113,13 @@ import { RouterView } from "vue-router";
         </v-row>
 
     </body>
-
+</div>
 </template>
 
 
-<script>
+<script setup>
 import { ref } from "vue";
+import { RouterView } from "vue-router";
 
 const colors = ref([
     'indigo',
@@ -252,7 +247,7 @@ const viewDetails = (index) => {
 
 .custom-heading {
     font-family: "GongGothicMedium";
-    margin-left: 80px;
+    margin-left: 50px;
     margin-top: 20px;
     margin-bottom: -20px;
 }

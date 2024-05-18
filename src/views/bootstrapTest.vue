@@ -7,7 +7,7 @@ import TripMap from "@/components/bootstrapTest/TripMap.vue";
 </script>
 
 <template>
-  <div class="container">
+  <div class="container-bootstrap">
     <Sidebar></Sidebar>
     <!-- <TopButton></TopButton> -->
     <TripMap></TripMap>
@@ -15,7 +15,7 @@ import TripMap from "@/components/bootstrapTest/TripMap.vue";
 </template>
 
 <style>
-.container {
+.container-bootstrap {
   display: flex;
 }
 

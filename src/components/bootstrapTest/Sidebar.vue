@@ -100,11 +100,25 @@
       </button>
     </div>
   </div>
+  <div class="top-btn">
+    <v-item-group selected-class="bg-yellow" multiple>
+      <!-- <div class="text-caption mb-2">Tags</div> -->
+      <v-item
+        v-for="(category, index) in categories"
+        :key="index"
+        v-slot="{ selectedClass, toggle }"
+      >
+        <v-chip :class="selectedClass" @click="toggle">{{ category }}</v-chip>
+      </v-item>
+    </v-item-group>
+  </div>
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import Sidebar from "primevue/sidebar";
+import { useRouter } from "vue-router";
+
 export default defineComponent({
   name: "SidebarComponent",
   components: {
@@ -112,33 +126,31 @@ export default defineComponent({
   },
   data() {
     return {
-      selectedValue1: null, // 첫 번째 선택값을 저장할 변수
-      selectedValue2: null, // 두 번째 선택값을 저장할 변수
+      selectedValue1: null,
+      selectedValue2: null,
       searchResult: null,
       buttons: ["추천테마", "인기장소", "여행코스", "나의여행"],
-      selectedButton: 0, // 첫 번째 버튼이 기본적으로 선택되어 있음
-      selectedCard: null, // 선택된 카드의 인덱스 업데이트
-      visibleRight: false, // Sidebar visibility state
+      selectedButton: 0,
+      selectedCard: null,
+      selectedCardDescription: "",
+      visibleRight: false,
       tags: ["#가족과함께", "#연인과함께", "#반려동물과함께", "#친구와함께"],
-      cards: [
+      categories:["🌄 관광지", "📖 문화시설", "👨‍👩‍👧‍👦 행사", "🏀 레포츠", "👜 쇼핑", "🍴 음식점"],
+      cards:[
         {
-          imgSrc:
-            "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
+          imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
           description: "카드1",
         },
         {
-          imgSrc:
-            "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
+          imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
           description: "카드2",
         },
         {
-          imgSrc:
-            "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
+          imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
           description: "카드3",
         },
         {
-          imgSrc:
-            "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
+          imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
           description: "카드4",
         },
         // 추가 카드 데이터...
@@ -147,12 +159,12 @@ export default defineComponent({
   },
   methods: {
     selectButton(index) {
-      this.selectedButton = index; // 선택된 버튼의 인덱스 업데이트
-      this.$emit("open-sidebar", this.buttons[index]); // 선택된 버튼의 정보를 이벤트로 전달
+      this.selectedButton = index;
+      this.$emit("open-sidebar", this.buttons[index]);
     },
-    handleCardClick(index) {
-      this.selectedCard = index; // 선택된 카드의 인덱스 업데이트
-      this.visibleRight = true; // Sidebar를 열도록 설정
+    handleCardClick(card) {
+      this.selectedCardDescription = card.description;
+      this.visibleRight = true;
     },
     search() {
       if (this.selectedValue1 && this.selectedValue2) {
@@ -161,15 +173,20 @@ export default defineComponent({
         this.searchResult = "먼저 두 가지를 선택해주세요.";
       }
     },
-    handleCardClick(card) {
-      this.selectedCardDescription = card.description; // 선택된 카드의 설명 저장
-      this.visibleRight = true; // Sidebar를 열도록 설정
-    },
   },
 });
+
+const categories = [
+  "🌄 관광지",
+  "📖 문화시설",
+  "👨‍👩‍👧‍👦 행사",
+  "🏀 레포츠",
+  "👜 쇼핑",
+  "🍴 음식점",
+];
 </script>
 
-<style>
+<style scoped>
 @font-face {
   font-family: "GongGothicMedium";
   src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
@@ -179,20 +196,15 @@ export default defineComponent({
 }
 
 .sidebar {
-  /* width: 200px;
-      height: 100vh; */
   background-color: transparent;
   padding: 0px;
   font-family: "GongGothicMedium";
 }
 
 .sidebar2 {
-  /* width: 200px;
-      height: 100vh; */
   background-color: transparent;
   padding: 0px;
   font-family: "GongGothicMedium";
-  /* background-color: rgb(232, 226, 226); */
 }
 
 .btn-secondary {
@@ -209,12 +221,12 @@ export default defineComponent({
 }
 
 .btn-secondary-card.active {
-  border-color: white; /* 원하는 테두리 색상으로 변경 */
+  border-color: white;
   border-width: 3px;
 }
 
 .border-selected {
-  border-color: #ffc700 !important; /* 선택된 카드의 테두리 색상 */
+  border-color: #ffc700 !important;
   border-width: 3px;
 }
 
@@ -225,15 +237,15 @@ export default defineComponent({
 }
 
 .custom-width-1 {
-  width: 35%; /* 원하는 크기로 조절 */
+  width: 35%;
   font-size: 12px;
 }
 .custom-width-2 {
-  width: 35%; /* 원하는 크기로 조절 */
+  width: 35%;
   font-size: 12px;
 }
 .custom-width-button {
-  width: 20%; /* 원하는 크기로 조절 */
+  width: 20%;
   background-color: #ffc700;
   border-color: #ffc700;
   color: white;
@@ -249,5 +261,13 @@ export default defineComponent({
 
 .text-color {
   background-color: #ffc700;
+}
+
+.top-btn {
+  font-family: "GongGothicMedium";
+  position: absolute; /* 절대 위치 지정 */
+  top: 70px; /* 원하는 위치로 조정 */
+  left: 380px; /* 원하는 위치로 조정 */
+  z-index: 2;
 }
 </style>
