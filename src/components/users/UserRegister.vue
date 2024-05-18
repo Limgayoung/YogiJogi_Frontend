@@ -16,6 +16,7 @@
     </div>
   </div>
 
+  <div class="joinform">
   <h1 class="join">회원가입</h1>
 
   <form @submit.prevent="checkForm">
@@ -50,6 +51,7 @@
     </div>
     <button class="submit" type="submit">회원가입</button>
   </form>
+</div>
 </template>
 
 <script setup>
@@ -282,5 +284,10 @@ const checkForm = () => {
 .divider {
   border: 1px solid #ccc;
   margin: 30px 0;
+}
+
+.joinform{
+  width: 40%;
+  margin: 15px auto;
 }
 </style>
