@@ -22,7 +22,7 @@
               <router-link class="nav-link" to="/bootstrapTest">여행지도</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/login">여행코스</router-link>
+              <router-link class="nav-link" to="/plan">여행코스</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" to="/login">로그인</router-link>

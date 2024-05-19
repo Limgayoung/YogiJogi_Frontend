@@ -41,6 +41,16 @@ const router = createRouter({
       // beforeEnter: onlyAuthUser,
       component: () => import("@/components/users/UserMyPage.vue"),
     },
+    {
+      path: "/plan",
+      name: "plan",
+      component: () => import("@/views/ThePlanView.vue")
+    },
+    {
+      path: "/makePlan",
+      name:"makePlan",
+      component: () => import("@/components/plan/MakePlan.vue")
+    }
   ],
 });
 

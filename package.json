@@ -11,13 +11,12 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "axios": "^1.6.8",
-    "bootstrap": "^5.3.3",
     "bootstrap-vue-3": "^0.5.1",
     "pinia": "^2.1.7",
     "primevue": "^3.52.0",
-    "vue": "^3.4.21",
     "vue-router": "^4.3.0",
-    "vue3-kakao-maps": "^2.3.6"
+    "vue3-kakao-maps": "^2.3.6",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
@@ -27,6 +26,6 @@
     "vite": "^5.2.8",
     "vite-plugin-vue-devtools": "^7.0.25",
     "vite-plugin-vuetify": "^2.0.3",
-    "vuetify": "^3.6.6"
+    "vuetify": "^3.6.5"
   }
 }
