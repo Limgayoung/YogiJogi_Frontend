@@ -50,6 +50,11 @@ const router = createRouter({
       path: "/makePlan",
       name:"makePlan",
       component: () => import("@/components/plan/MakePlan.vue")
+    },
+    {
+      path: "/planDetail",
+      name:"planDetail",
+      component: () => import("@/components/plan/PlanDetail.vue")
     }
   ],
 });

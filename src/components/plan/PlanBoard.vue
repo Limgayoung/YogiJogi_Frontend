@@ -141,7 +141,9 @@ const cards = ref([
             scrim="#ccc"
             contained
           >
-            <v-btn class="moreInfo" variant="flat">상세 정보 보러가기</v-btn>
+            <router-link to="/planDetail">
+              <v-btn class="moreInfo" variant="flat">상세 정보 보러가기</v-btn>
+            </router-link>
           </v-overlay>
         </v-card>
       </v-hover>

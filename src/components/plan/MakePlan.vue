@@ -1,6 +1,12 @@
 <script>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import draggable from "vuedraggable";
+import {
+  KakaoMap,
+  KakaoMapMarkerPolyline,
+  KakaoMapMarker,
+  KakaoMapCustomOverlay,
+} from "vue3-kakao-maps";
 
 export default {
   data() {
@@ -44,8 +50,6 @@ export default {
   },
   methods: {
     search() {
-      // 검색 버튼을 클릭하면 검색어와 선택된 값들을 다른 페이지로 전달할 수 있습니다.
-      // 여기서는 간단히 콘솔에 로그를 출력하는 것으로 대체합니다.
       console.log("Selected Value 1:", this.selectedValue1);
       console.log("Selected Value 2:", this.selectedValue2);
       console.log("Search Text:", this.searchText);
@@ -59,7 +63,7 @@ export default {
 </script>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import draggable from "vuedraggable";
 import {
   KakaoMap,
@@ -70,7 +74,7 @@ import {
 
 // 초기 공간들
 const spaces = ref([
-  { title: "1일차", items: ["강남역", "멀티캠퍼스", "대림역"] },
+  { title: "1일차", items: [{ name: "강남역" }, { name: "멀티캠퍼스" }, { name: "대림역" }] },
 ]);
 
 // 새로운 공간 추가 함수
@@ -82,9 +86,14 @@ const addSpace = () => {
 const addItemToLastSpace = () => {
   const lastSpace = spaces.value[spaces.value.length - 1];
   if (lastSpace) {
-    lastSpace.items.push(`새로운 여행지${lastSpace.items.length + 1}`);
+    lastSpace.items.push({ name: `새로운 여행지${lastSpace.items.length + 1}` });
   }
 };
+
+// spaces가 변경될 때마다 새로운 값을 콘솔에 출력
+watch(spaces, (newVal) => {
+  console.log("Spaces updated:", newVal);
+}, { deep: true });
 
 /**
  * 해당 장소에 대한 세부 내용 Server로부터 받는다.
@@ -173,15 +182,12 @@ const onClickKakaoMapMarker = () => {
       </div>
       <div class="top-btn">
         <v-item-group selected-class="bg-yellow" multiple>
-          <!-- <div class="text-caption mb-2">Tags</div> -->
           <v-item
             v-for="(category, index) in categories"
             :key="index"
             v-slot="{ selectedClass, toggle }"
           >
-            <v-chip :class="selectedClass" @click="toggle">{{
-              category
-            }}</v-chip>
+            <v-chip :class="selectedClass" @click="toggle">{{ category }}</v-chip>
           </v-item>
         </v-item-group>
       </div>
@@ -196,7 +202,7 @@ const onClickKakaoMapMarker = () => {
         <div
           class="card"
           :class="{ 'border-selected': selectedCard === index }"
-          style="width: 18rem"
+          style="width: 21rem"
         >
           <img
             :src="card.imgSrc"
@@ -236,9 +242,7 @@ const onClickKakaoMapMarker = () => {
     <div class="right-box">
       <div class="space-container">
         <button @click="addSpace" class="add-space-btn">Add New Space</button>
-        <button @click="addItemToLastSpace" class="add-item-btn">
-          Add Item to Last Space
-        </button>
+        <button @click="addItemToLastSpace" class="add-item-btn">Add Item to Last Space</button>
         <div v-for="(space, index) in spaces" :key="index" class="space-item">
           <h1>{{ space.title }}</h1>
           <draggable
@@ -246,9 +250,10 @@ const onClickKakaoMapMarker = () => {
             tag="ul"
             group="meals"
             class="draggable-list"
+            :itemKey="item => item.name"
           >
             <template #item="{ element: meal }">
-              <li>{{ meal }}</li>
+              <li>{{ meal.name }}</li>
             </template>
           </draggable>
         </div>
@@ -357,7 +362,6 @@ const onClickKakaoMapMarker = () => {
 
 .space-item {
   margin-top: 20px;
-  border-radius: 10%;
 }
 
 .draggable-list {
