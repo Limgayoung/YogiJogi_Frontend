@@ -31,9 +31,9 @@ export const useUserStore = defineStore("user", {
       try {
         const config = {
           method: "get",
-          url: "http://localhost/api/users/9",
+          url: `http://localhost/api/users/${this.user}`,
           headers: {
-            //   Authorization: `${this.jwtToken.accessToken}`,
+               Authorization: `${this.jwtToken.accessToken}`,
           },
         };
 
@@ -61,4 +61,14 @@ export const useUserStore = defineStore("user", {
   getters: {
     isAuthenticated: (state) => !!state.user,
   },
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        key: 'auth',
+        storage: localStorage,
+      },
+    ],
+  },
+  
 });

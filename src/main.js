@@ -5,6 +5,7 @@ import App from './App.vue';
 import router from './router';
 import vuetify from './util/vuetify';
 import axios from '@/util/axios';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import PrimVue from 'primevue/config';
 
 // import BootstrapVue3 from 'bootstrap-vue-3';
@@ -15,7 +16,10 @@ import 'primevue/resources/primevue.min.css';
 
 const app = createApp(App);
 
-app.use(createPinia());
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+
+app.use(pinia);
 app.use(router);
 app.use(vuetify);
 app.use(PrimVue);
