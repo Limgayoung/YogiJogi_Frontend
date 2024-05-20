@@ -1,23 +1,14 @@
 <template>
   <div class="container">
-    <!-- <v-img
-      class="mx-auto my-6"
-      max-width="228"
-      src="https://cdn.vuetifyjs.com/docs/images/logos/vuetify-logo-v3-slim-text-light.svg"
-    ></v-img> -->
     <div class="text-center mb-4">
       <div class="login-text">로그인</div>
     </div>
 
-    <v-card
-      class="mx-auto pa-12 pb-8"
-      elevation="8"
-      max-width="448"
-      rounded="lg"
-    >
+    <v-card class="mx-auto pa-12 pb-8" elevation="8" max-width="448" rounded="lg">
       <div class="text-subtitle-1 text-medium-emphasis">아이디</div>
 
       <v-text-field
+        v-model="loginId"
         density="compact"
         placeholder="Email address"
         prepend-inner-icon="mdi-email-outline"
@@ -25,22 +16,15 @@
         class="font-gothic-medium"
       ></v-text-field>
 
-      <div
-        class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
-      >
+      <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
         비밀번호
-
-        <a
-          class="text-caption text-decoration-none text-blue"
-          href="#"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          비밀번호 찾기</a
-        >
+        <a class="text-caption text-decoration-none text-blue" href="#" rel="noopener noreferrer" target="_blank">
+          비밀번호 찾기
+        </a>
       </div>
 
       <v-text-field
+        v-model="password"
         :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
         :type="visible ? 'text' : 'password'"
         density="compact"
@@ -51,15 +35,7 @@
         @click:append-inner="visible = !visible"
       ></v-text-field>
 
-      <!-- <v-card class="mb-12" color="surface-variant" variant="tonal">
-        <v-card-text class="text-medium-emphasis text-caption">
-          Warning: After 3 consecutive failed login attempts, you account will
-          be temporarily locked for three hours. If you must login now, you can
-          also click "Forgot login password?" below to reset the login password.
-        </v-card-text>
-      </v-card> -->
-
-      <v-btn class="mb-8" color="blue" size="large" variant="tonal" block>
+      <v-btn @click="handleLogin" class="mb-8" color="blue" size="large" variant="tonal" block>
         로그인
       </v-btn>
 
@@ -73,10 +49,41 @@
 </template>
 
 <script>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/userStore.js';
+
 export default {
-  data: () => ({
-    visible: false,
-  }),
+  setup() {
+    const loginId = ref('');
+    const password = ref('');
+    const visible = ref(false);
+    const router = useRouter();
+    const userStore = useUserStore();
+
+    const handleLogin = async () => {
+      try {
+        const credentials = {
+          loginId: loginId.value,
+          password: password.value,
+        };
+        await userStore.login(credentials);
+        console.log(credentials);
+        console.log('로그인 성공:', userStore.user);
+        router.push('/');
+      } catch (error) {
+        console.error('로그인 오류:', error);
+        alert('로그인에 실패했습니다. 다시 시도해주세요.');
+      }
+    };
+
+    return {
+      loginId,
+      password,
+      visible,
+      handleLogin,
+    };
+  },
 };
 </script>
 
@@ -95,14 +102,14 @@ export default {
 .text-subtitle-1,
 .text-blue,
 .font-gothic-medium,
-.text-caption, 
+.text-caption,
 .container,
 .login-text {
   font-family: "GongGothicMedium";
 }
 
-.login-text{
-margin-top: 15px;
-font-size: 50px;
+.login-text {
+  margin-top: 15px;
+  font-size: 50px;
 }
 </style>

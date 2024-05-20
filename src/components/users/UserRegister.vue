@@ -17,119 +17,212 @@
   </div>
 
   <div class="joinform">
-  <h1 class="join">회원가입</h1>
+    <h1 class="join">회원가입</h1>
 
-  <form @submit.prevent="checkForm">
-    <div class="form-group">
-      <label for="username">이름</label>
-      <input type="text" ref="username" placeholder="이름" id="username" v-model="formData.username" />
-    </div>
-    <div class="form-group">
-      <label for="email">이메일</label>
-      <input type="text" ref="email" placeholder="이메일" id="email" v-model="formData.email" />
-    </div>
-    <div class="form-group">
-      <label for="password">비밀번호</label>
-      <input type="password" ref="password" placeholder="비밀번호" id="password" v-model="formData.password" />
-    </div>
-    <div class="form-group">
-      <label for="confirm-password">비밀번호 확인</label>
-      <input type="password" placeholder="비밀번호 확인" id="confirm-password" ref="confirmPassword"
-        v-model="confirmPasswordChk" />
-    </div>
-    <div class="control">
-      <div class="custom-control">
-        <input type="checkbox" id="agreement-1" value="1" v-model="service_agree" />
-        <label for="agreement-1">서비스 약관에 동의합니다.</label>
-        <a href="#" target="_blank">내용보기</a>
+    <form @submit.prevent="checkForm">
+      <div class="form-group">
+        <label for="name">이름</label>
+        <input
+          type="text"
+          ref="name"
+          placeholder="이름"
+          id="name"
+          v-model="formData.name"
+        />
       </div>
-      <div class="custom-control">
-        <input type="checkbox" id="agreement-2" value="2" v-model="privacy_agree" />
-        <label for="agreement-2">개인정보 수집 및 이용에 동의합니다. </label>
-        <a href="#" target="_blank">내용보기</a>
+
+      <div class="form-group">
+        <label for="loginId">아이디</label>
+        <input
+          type="text"
+          ref="loginId"
+          placeholder="아이디"
+          id="loginId"
+          v-model="formData.loginId"
+        />
       </div>
-    </div>
-    <button class="submit" type="submit">회원가입</button>
-  </form>
-</div>
+
+      <div class="form-group">
+        <label for="nickname">닉네임</label>
+        <input
+          type="text"
+          ref="nickname"
+          placeholder="닉네임"
+          id="nickname"
+          v-model="formData.nickname"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">비밀번호</label>
+        <input
+          type="password"
+          ref="password"
+          placeholder="비밀번호"
+          id="password"
+          v-model="formData.password"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="confirm-password">비밀번호 확인</label>
+        <input
+          type="password"
+          placeholder="비밀번호 확인"
+          id="confirm-password"
+          ref="confirmPassword"
+          v-model="confirmPasswordChk"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">이메일</label>
+        <input
+          type="text"
+          ref="email"
+          placeholder="이메일"
+          id="email"
+          v-model="formData.email"
+        />
+      </div>
+      <div class="control">
+        <div class="custom-control">
+          <input
+            type="checkbox"
+            id="agreement-1"
+            value="1"
+            v-model="service_agree"
+          />
+          <label for="agreement-1">서비스 약관에 동의합니다.</label>
+          <a href="#" target="_blank">내용보기</a>
+        </div>
+        <div class="custom-control">
+          <input
+            type="checkbox"
+            id="agreement-2"
+            value="2"
+            v-model="privacy_agree"
+          />
+          <label for="agreement-2">개인정보 수집 및 이용에 동의합니다. </label>
+          <a href="#" target="_blank">내용보기</a>
+        </div>
+      </div>
+      <button class="submit" type="submit">회원가입</button>
+    </form>
+  </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useSignUpStore } from '@/stores/signup.js'
+import axios from "axios";
+import { onMounted, ref } from "vue";
 
-const store = useSignUpStore()
-const isOpen = ref(false)
-const message = ref('')
+const isOpen = ref(false);
+const message = ref("");
 const formData = ref({
-  username: '',
-  email: '',
-  password: '',
-})
+  loginId: "",
+  password: "",
+  name: "",
+  nickname: "",
+  email: "",
+});
 const eleRef = ref();
-const confirmPasswordChk = ref('');
+const confirmPasswordChk = ref("");
 
-const username = ref(null)
-const email = ref(null)
-const password = ref(null)
-const confirmPassword = ref(null)
+const loginId = ref(null);
+const password = ref(null);
+const name = ref(null);
+const nickname = ref(null);
+const confirmPassword = ref(null);
 
-const service_agree = ref(false)
-const privacy_agree = ref(false)
+const service_agree = ref(false);
+const privacy_agree = ref(false);
 
 const isOpenToggle = () => {
-  isOpen.value = !isOpen.value
-}
+  isOpen.value = !isOpen.value;
+};
 
 const isValidEmail = (email) => {
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-  console.log(emailRegex.test(email))
-  return emailRegex.test(email)
-}
+  console.log(emailRegex.test(email));
+  return emailRegex.test(email);
+};
 
 const errMsg = () => {
   isOpen.value = false;
-  if (eleRef.value) {
+  if (eleRef.value && eleRef.value.value) {
     eleRef.value.value.focus();
   }
-}
+};
 
-const checkForm = () => {
-  if (formData.value.username.length > 5 || formData.value.username.length === 0) {
-    message.value = '닉네임은 다섯 글자 이하로 입력해 주세요.'
+const checkForm = async () => {
+  if (formData.value.name.length === 0) {
+    message.value = "이름을 입력해 주세요.";
     isOpenToggle();
-    eleRef.value = username;
+    eleRef.value = name;
     return;
-  } else if (!isValidEmail(formData.value.email) || formData.value.email.length === 0) {
-    message.value = '이메일 주소를 정확히 입력해주세요.'
+  } else if (formData.value.loginId.length === 0) {
+    message.value = "아이디를 입력해 주세요.";
     isOpenToggle();
-    eleRef.value = email;
+    eleRef.value = loginId;
+    return;
+  } else if (
+    formData.value.nickname.length > 10 ||
+    formData.value.nickname.length === 0
+  ) {
+    message.value = "닉네임는 1글자 이상 10글자 이하로 입력해 주세요.";
+    isOpenToggle();
+    eleRef.value = nickname;
     return;
   } else if (formData.value.password.length === 0) {
-    message.value = '비밀번호를 정확히 입력해주세요.'
+    message.value = "비밀번호를 정확히 입력해주세요.";
     isOpenToggle();
     eleRef.value = password;
     return;
   } else if (formData.value.password !== confirmPasswordChk.value) {
-    message.value = '비밀번호가 일치하지 않습니다.\n 다시 입력해 주세요.'
+    message.value = "비밀번호가 일치하지 않습니다.\n 다시 입력해 주세요.";
     isOpenToggle();
     eleRef.value = confirmPassword;
     return;
+  } else if (
+    !isValidEmail(formData.value.email) ||
+    formData.value.email.length === 0
+  ) {
+    message.value = "이메일 주소를 정확히 입력해주세요.";
+    isOpenToggle();
+    eleRef.value = email;
+    return;
   } else if (!service_agree.value || !privacy_agree.value) {
-    message.value = '약관에 동의해 주세요.'
+    message.value = "약관에 동의해 주세요.";
     isOpenToggle();
     eleRef.value = null;
     return;
   }
-  store.submitForm(formData.value);
-}
 
+  try {
+    const response = await axios.post(
+      "http://localhost/api/users/join",
+      formData.value
+    );
+    // 여기서 response를 처리할 수 있습니다.
+    console.log(response.data);
+    // 성공적으로 회원가입이 처리되었음을 사용자에게 알릴 수 있습니다.
+    message.value = "회원가입이 완료되었습니다.";
+    isOpenToggle();
+  } catch (error) {
+    // 오류 발생 시 처리할 내용
+    console.error("Error during signup:", error);
+    // 오류 메시지를 사용자에게 표시할 수 있습니다.
+    message.value = "회원가입에 실패했습니다. 다시 시도해주세요.";
+    isOpenToggle();
+  }
+};
 </script>
 
 <style>
 @font-face {
   font-family: "GongGothicMedium";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
+    format("woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -286,7 +379,7 @@ const checkForm = () => {
   margin: 30px 0;
 }
 
-.joinform{
+.joinform {
   width: 40%;
   margin: 15px auto;
 }

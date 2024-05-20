@@ -1,272 +1,184 @@
 <template>
-    <div class="error_msg" :class="[isOpen ? 'open' : '']">
-      <div class="error_bg"></div>
-      <div class="error_wrap">
-        <div class="header">
-          <span>알림</span>
-          <button @click="isOpenToggle()">X</button>
-        </div>
-        <div class="divider"></div>
-        <div class="content">
-          {{ message }}
-        </div>
-        <div class="btn_wrap">
-          <button @click="errMsg">확인</button>
-        </div>
-      </div>
+  <div class="container">
+    <div class="text-center mb-4">
+      <div class="login-text">마이페이지</div>
     </div>
-  
-    <h1 class="join">마이페이지</h1>
-  
-    <form @submit.prevent="checkForm">
-      <div class="form-group">
-        <label for="username">이름</label>
-        <input type="text" ref="username" placeholder="이름" id="username" v-model="formData.username" />
+
+    <v-card class="mx-auto pa-12 pb-8" elevation="8" max-width="448" rounded="lg">
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon1">
+            <i class="mdi mdi-account"></i>
+          </span>
+        </div>
+        <input
+          v-model="userInfo.loginId"
+          type="text"
+          class="form-control"
+          placeholder="Email address"
+          aria-label="Email address"
+          aria-describedby="basic-addon1"
+          disabled
+        />
       </div>
-      <div class="form-group">
-        <label for="email">이메일</label>
-        <input type="text" ref="email" placeholder="이메일" id="email" v-model="formData.email" />
+
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon2">
+            <i class="mdi mdi-account-circle"></i>
+          </span>
+        </div>
+        <input
+          v-model="userInfo.name"
+          type="text"
+          class="form-control"
+          placeholder="Name"
+          aria-label="Name"
+          aria-describedby="basic-addon2"
+        />
       </div>
-      <div class="form-group">
-        <label for="password">비밀번호</label>
-        <input type="password" ref="password" placeholder="비밀번호" id="password" v-model="formData.password" />
+
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon3">
+            <i class="mdi mdi-email"></i>
+          </span>
+        </div>
+        <input
+          v-model="userInfo.email"
+          type="email"
+          class="form-control"
+          placeholder="Email"
+          aria-label="Email"
+          aria-describedby="basic-addon3"
+        />
       </div>
-      <div class="form-group">
-        <label for="confirm-password">비밀번호 확인</label>
-        <input type="password" placeholder="비밀번호 확인" id="confirm-password" ref="confirmPassword"
-          v-model="confirmPasswordChk" />
+
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon4">
+            <i class="mdi mdi-account-circle-outline"></i>
+          </span>
+        </div>
+        <input
+          v-model="userInfo.nickName"
+          type="text"
+          class="form-control"
+          placeholder="Nickname"
+          aria-label="Nickname"
+          aria-describedby="basic-addon4"
+        />
       </div>
-      
-      <button class="submit" type="submit">수정</button>
-      <button class="submit" type="submit">탈퇴</button>
-    </form>
-  </template>
-  
-  <script setup>
-  import { onMounted, ref } from 'vue'
-  import { useSignUpStore } from '@/stores/signup.js'
-  
-  const store = useSignUpStore()
-  const isOpen = ref(false)
-  const message = ref('')
-  const formData = ref({
-    username: '김현지',
-    email: 'khj@ssafy.com',
-    password: '1234',
-  })
-  const eleRef = ref();
-  const confirmPasswordChk = ref('');
-  
-  const username = ref(null)
-  const email = ref(null)
-  const password = ref(null)
-  const confirmPassword = ref(null)
-  
-  const service_agree = ref(false)
-  const privacy_agree = ref(false)
-  
-  const isOpenToggle = () => {
-    isOpen.value = !isOpen.value
-  }
-  
-  const isValidEmail = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    console.log(emailRegex.test(email))
-    return emailRegex.test(email)
-  }
-  
-  const errMsg = () => {
-    isOpen.value = false;
-    if (eleRef.value) {
-      eleRef.value.value.focus();
-    }
-  }
-  
-  const checkForm = () => {
-    if (formData.value.username.length > 5 || formData.value.username.length === 0) {
-      message.value = '닉네임은 다섯 글자 이하로 입력해 주세요.'
-      isOpenToggle();
-      eleRef.value = username;
-      return;
-    } else if (!isValidEmail(formData.value.email) || formData.value.email.length === 0) {
-      message.value = '이메일 주소를 정확히 입력해주세요.'
-      isOpenToggle();
-      eleRef.value = email;
-      return;
-    } else if (formData.value.password.length === 0) {
-      message.value = '비밀번호를 정확히 입력해주세요.'
-      isOpenToggle();
-      eleRef.value = password;
-      return;
-    } else if (formData.value.password !== confirmPasswordChk.value) {
-      message.value = '비밀번호가 일치하지 않습니다.\n 다시 입력해 주세요.'
-      isOpenToggle();
-      eleRef.value = confirmPassword;
-      return;
-    } 
-    store.submitForm(formData.value);
-  }
-  
-  </script>
-  
-  <style>
-  @font-face {
-    font-family: "GongGothicMedium";
-    src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
-    font-weight: normal;
-    font-style: normal;
-  }
-  
-  /* 에러 출력 창 */
-  .error_msg {
-    display: none;
-    position: fixed;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    background: #fff;
-    border-radius: 10px;
-    padding: 20px;
-    box-sizing: border-box;
-    border: 2px solid #ccc;
-  }
-  
-  .error_msg.open {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .header,
-  .divider,
-  .content,
-  .btn_wrap {
-    display: block;
-  }
-  
-  .error_wrap {
-    position: relative;
-  }
-  
-  .header {
-    order: -1;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-  }
-  
-  .header span {
-    font-family: "GongGothicMedium";
-    /* flex: 1;  */
-  }
-  
-  .header button {
-    font-family: "GongGothicMedium";
-    /* flex: 1;  */
-    margin-left: 10px;
-  }
-  
-  .btn_wrap button {
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    padding: 5px 10px;
-    background-color: transparent;
-    cursor: pointer;
-  }
-  
-  .btn_wrap button:hover {
-    font-family: "GongGothicMedium";
-    background-color: #f0f0f0;
-  }
-  
-  .join {
-    font-family: "GongGothicMedium";
-  }
-  
-  .content {
-    margin-top: 25px;
-    margin-bottom: 25px;
-    font-family: "GongGothicMedium";
-  }
-  
-  .btn_wrap {
-    font-family: "GongGothicMedium";
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    padding: 5px 10px;
-    margin-top: 20px;
-    margin-bottom: 10px;
-  }
-  
-  .btn_wrap button {
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .form-group input[type="text"],
-  .form-group input[type="password"] {
-    font-family: "GongGothicMedium";
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    padding: 5px 10px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 5px;
-  }
-  
-  .form-group input[type="text"]:focus,
-  .form-group input[type="password"]:focus {
-    font-family: "GongGothicMedium";
-    outline: none;
-    border-color: #007bff;
-  }
-  
-  .form-group label {
-    font-family: "GongGothicMedium";
-    display: block;
-    margin-bottom: 5px;
-    text-align: left;
-  }
-  
-  .control .custom-control {
-    font-family: "GongGothicMedium";
-    display: flex;
-    align-items: center;
-  }
-  
-  .control .custom-control input[type="checkbox"] {
-    margin-right: 10px;
-  }
-  
-  .control .custom-control label {
-    font-family: "GongGothicMedium";
-    flex: 1;
-    text-align: left;
-  }
-  
-  .submit {
-    font-family: "GongGothicMedium";
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .submit:hover {
-    font-family: "GongGothicMedium";
-    background-color: #ccc;
-    color: black;
-  }
-  
-  .divider {
-    border: 1px solid #ccc;
-    margin: 30px 0;
-  }
-  </style>
-  
+
+      <v-btn @click="updateUserInfo" class="mb-8" color="primary" size="large" variant="outlined" block>
+        수정 완료
+      </v-btn>
+    </v-card>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted } from 'vue';
+import { useUserStore } from '@/stores/userStore.js';
+
+export default {
+  setup() {
+    const userInfo = ref({
+      loginId: '',
+      name: '',
+      email: '',
+      nickName: ''
+    });
+    const userStore = useUserStore();
+
+    const updateUserInfo = async () => {
+      try {
+        await userStore.updateUserInfo(userInfo.value);
+      } catch (error) {
+        console.error('사용자 정보 업데이트 오류:', error);
+        alert('사용자 정보를 업데이트하는 데 실패했습니다. 다시 시도해주세요.');
+      }
+    };
+
+    onMounted(() => {
+      userStore.fetchUserInfo();
+      console.log(userInfo);
+    });
+
+    return {
+      userInfo,
+      updateUserInfo
+    };
+  },
+};
+</script>
+
+<style scoped>
+.container {
+  font-family: "GongGothicMedium";
+}
+
+.login-text {
+  margin-top: 15px;
+  font-size: 50px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.btn-primary:focus,
+.btn-primary.focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+}
+
+.text-blue {
+  color: #007bff;
+}
+
+.text-blue:hover {
+  color: #0056b3;
+}
+
+.text-decoration-none {
+  text-decoration: none;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.input-group {
+  width: 100%;
+}
+
+.input-group-text {
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  color: #495057;
+}
+
+.input-group-text i {
+  font-size: 1rem;
+}
+
+.form-control {
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+</style>
