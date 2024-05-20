@@ -1,10 +1,6 @@
 <template>
   <div class="sidebar">
-    <div
-      class="btn-group-vertical"
-      role="group"
-      aria-label="Vertical button group"
-    >
+    <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
       <button
         v-for="(button, index) in buttons"
         :key="index"
@@ -20,29 +16,30 @@
   <div class="sidebar2">
     <div class="where-go">어디로 떠나볼까요?</div>
     <div v-if="searchResult" class="search-result">
-      {{ selectedValue1 }} {{ selectedValue2 }}
+      {{ selectedAreaName }} {{ selectedGugunName }}
     </div>
     <div class="container-side mt-3">
       <div class="d-flex">
         <select
-          v-model="selectedValue1"
+          v-model="selectedAreaCode"
           class="form-select custom-width-1-side mr-2"
           aria-label="Default select example"
+          @change="fetchGugunCodes"
         >
           <option value="" disabled>첫 번째 선택</option>
-          <option value="서울시특별시">서울시특별시</option>
-          <option value="인천광역시">인천광역시</option>
-          <option value="경기도">경기도</option>
+          <option v-for="area in areas" :key="area.code" :value="area.code">
+            {{ area.name }}
+          </option>
         </select>
         <select
-          v-model="selectedValue2"
+          v-model="selectedGugunCode"
           class="form-select custom-width-2-side mr-2"
           aria-label="Default select example"
         >
           <option value="" disabled>두 번째 선택</option>
-          <option value="영등포구">영등포구</option>
-          <option value="계양구">계양구</option>
-          <option value="강남구">강남구</option>
+          <option v-for="gugun in guguns" :key="gugun.code" :value="gugun.code">
+            {{ gugun.name }}
+          </option>
         </select>
         <button type="button" class="btn custom-width-button" @click="search">
           검색
@@ -54,12 +51,7 @@
         <v-chip v-for="tag in tags" :key="tag"> {{ tag }} </v-chip>
       </v-chip-group>
     </div>
-
-    <div
-      class="btn-group-vertical"
-      role="group"
-      aria-label="Vertical button group"
-    >
+    <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
       <Sidebar
         v-model:visible="visibleRight"
         :selectedCardDescription="selectedCardDescription"
@@ -98,9 +90,7 @@
             />
           </div>
           <!-- 카드 바디를 오른쪽에 배치합니다. -->
-          <div
-            class="card-body col-8 d-flex justify-content-center align-items-center"
-          >
+          <div class="card-body col-8 d-flex justify-content-center align-items-center">
             <p class="card-text">{{ card.description }}</p>
           </div>
         </div>
@@ -123,8 +113,8 @@
 
 <script>
 import { defineComponent } from "vue";
+import axios from "axios";
 import Sidebar from "primevue/sidebar";
-import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "SidebarComponent",
@@ -133,17 +123,21 @@ export default defineComponent({
   },
   data() {
     return {
-      selectedValue1: null,
-      selectedValue2: null,
+      selectedAreaCode: null,
+      selectedGugunCode: null,
       searchResult: null,
+      areas: [],
+      guguns: [],
+      selectedAreaName: "",
+      selectedGugunName: "",
       buttons: ["추천테마", "인기장소", "여행코스", "나의여행"],
       selectedButton: 0,
       selectedCard: null,
       selectedCardDescription: "",
       visibleRight: false,
       tags: ["#가족과함께", "#연인과함께", "#반려동물과함께", "#친구와함께"],
-      categories:["🌄 관광지", "📖 문화시설", "👨‍👩‍👧‍👦 행사", "🏀 레포츠", "👜 쇼핑", "🍴 음식점"],
-      cards:[
+      categories: ["🌄 관광지", "📖 문화시설", "👨‍👩‍👧‍👦 행사", "🏀 레포츠", "👜 쇼핑", "🍴 음식점"],
+      cards: [
         {
           imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
           description: "카드1",
@@ -164,6 +158,9 @@ export default defineComponent({
       ],
     };
   },
+  mounted() {
+    this.fetchAreaCodes();
+  },
   methods: {
     selectButton(index) {
       this.selectedButton = index;
@@ -173,24 +170,33 @@ export default defineComponent({
       this.selectedCardDescription = card.description;
       this.visibleRight = true;
     },
+    async fetchAreaCodes() {
+      try {
+        const response = await axios.get("http://localhost/api/spots/areacode");
+        this.areas = response.data.data;
+      } catch (error) {
+        console.error("Error fetching area codes:", error);
+      }
+    },
+    async fetchGugunCodes() {
+      try {
+        const response = await axios.get(`http://localhost/api/spots/gungucode?areaCode=${this.selectedAreaCode}`);
+        this.guguns = response.data.data;
+      } catch (error) {
+        console.error("Error fetching gugun codes:", error);
+      }
+    },
     search() {
-      if (this.selectedValue1 && this.selectedValue2) {
-        this.searchResult = `${this.selectedValue1} - ${this.selectedValue2}에 대한 검색 결과가 여기에 나타납니다.`;
+      if (this.selectedAreaCode && this.selectedGugunCode) {
+        this.selectedAreaName = this.areas.find(area => area.code === this.selectedAreaCode)?.name || "";
+        this.selectedGugunName = this.guguns.find(gugun => gugun.code === this.selectedGugunCode)?.name || "";
+        this.searchResult = `${this.selectedAreaName} - ${this.selectedGugunName}에 대한 검색 결과가 여기에 나타납니다.`;
       } else {
         this.searchResult = "먼저 두 가지를 선택해주세요.";
       }
     },
   },
 });
-
-const categories = [
-  "🌄 관광지",
-  "📖 문화시설",
-  "👨‍👩‍👧‍👦 행사",
-  "🏀 레포츠",
-  "👜 쇼핑",
-  "🍴 음식점",
-];
 </script>
 
 <style scoped>
@@ -280,6 +286,4 @@ const categories = [
   z-index: 2;
   margin-left: 10px;
 }
-
-
 </style>

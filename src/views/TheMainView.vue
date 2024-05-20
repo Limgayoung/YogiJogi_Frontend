@@ -70,7 +70,7 @@
                 <v-img :src="card.imageUrl" aspect-ratio="1.3"></v-img>
                 <v-card-text>
                   <h2 class="cardSpotName">{{ card.name }}</h2>
-                  <p class="cardSpotDes">{{ card.description }}</p>
+                  <p class="cardSpotDes">{{ card.address }}</p>
                 </v-card-text>
                 <v-card-title>
                   <span class="text-primary text-subtitle-2">64 Reviews</span>
@@ -113,7 +113,7 @@
                 <v-img :src="card.imageUrl" aspect-ratio="1.3"></v-img>
                 <v-card-text>
                   <h2 class="cardSpotName">{{ card.name }}</h2>
-                  <p class="cardSpotDes">{{ card.description }}</p>
+                  <p class="cardSpotDes">{{ card.address }}</p>
                 </v-card-text>
                 <v-card-title>
                   <span class="text-primary text-subtitle-2">64 Reviews</span>
@@ -154,11 +154,11 @@
                 <v-img :src="card.imageUrl" aspect-ratio="1.3"></v-img>
                 <v-card-text>
                   <h2 class="cardSpotName">{{ card.name }}</h2>
-                  <p class="cardSpotDes">{{ card.description }}</p>
+                  <p class="cardSpotDes">{{ card.address }}</p>
                 </v-card-text>
-                <v-card-title>
+                <!-- <v-card-title>  
                   <span class="text-primary text-subtitle-2">64 Reviews</span>
-                </v-card-title>
+                </v-card-title> -->
                 <v-overlay
                   :model-value="isHovering"
                   class="align-center justify-center"
@@ -195,14 +195,15 @@
   const cards = ref([]);
   
   const fetchTopSpots = async () => {
-    try {
-      const response = await axios.get('http://localhost/api/spots/top/4');
-      cards.value = response.data;
-      console.log(`받은 cards의 수: ${cards.value.length}`); // 받은 cards의 수를 콘솔에 출력
-    } catch (error) {
-      console.error("Error fetching top spots:", error);
-    }
-  };
+  try {
+    const response = await axios.get('http://localhost/api/spots/top/4');
+    cards.value = response.data.data;
+    console.log(`받은 cards의 수: ${cards.value.length}`); // 받은 cards의 수를 콘솔에 출력
+    console.log(`cards 데이터:`, cards.value); // 받은 cards의 데이터를 콘솔에 출력
+  } catch (error) {
+    console.error("Error fetching top spots:", error);
+  }
+};
   
   onMounted(() => {
     fetchTopSpots();

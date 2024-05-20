@@ -5,25 +5,26 @@
       <div class="selectInfo">
         <div class="d-flex mb-3">
           <select
-            v-model="selectedValue1"
-            class="form-select custom-width-1 mr-2"
-            aria-label="Default select example"
-          >
-            <option value="" disabled>첫 번째 선택</option>
-            <option value="서울시특별시">서울시특별시</option>
-            <option value="인천광역시">인천광역시</option>
-            <option value="경기도">경기도</option>
-          </select>
-          <select
-            v-model="selectedValue2"
-            class="form-select custom-width-2 mr-2"
-            aria-label="Default select example"
-          >
-            <option value="" disabled>두 번째 선택</option>
-            <option value="영등포구">영등포구</option>
-            <option value="계양구">계양구</option>
-            <option value="강남구">강남구</option>
-          </select>
+          v-model="selectedAreaCode"
+          class="form-select custom-width-1-side mr-2"
+          aria-label="Default select example"
+          @change="fetchGugunCodes"
+        >
+          <option value="" disabled>첫 번째 선택</option>
+          <option v-for="area in areas" :key="area.code" :value="area.code">
+            {{ area.name }}
+          </option>
+        </select>
+        <select
+          v-model="selectedGugunCode"
+          class="form-select custom-width-2-side mr-2"
+          aria-label="Default select example"
+        >
+          <option value="" disabled>두 번째 선택</option>
+          <option v-for="gugun in guguns" :key="gugun.code" :value="gugun.code">
+            {{ gugun.name }}
+          </option>
+        </select>
         </div>
 
         <!-- 아래 줄 -->
@@ -163,6 +164,8 @@
 
 <script>
 import { ref, watch } from "vue";
+import { defineComponent } from "vue";
+import axios from "axios";
 import draggable from "vuedraggable";
 import {
   KakaoMap,
@@ -174,6 +177,13 @@ import {
 export default {
   data() {
     return {
+      selectedAreaCode: null,
+      selectedGugunCode: null,
+      searchResult: null,
+      areas: [],
+      guguns: [],
+      selectedAreaName: "",
+      selectedGugunName: "",
       selectedValue1: null,
       selectedValue2: null,
       searchText: "",
@@ -223,6 +233,9 @@ export default {
       ]),
     };
   },
+  mounted() {
+    this.fetchAreaCodes();
+  },
   methods: {
     search() {
       console.log("Selected Value 1:", this.selectedValue1);
@@ -251,6 +264,24 @@ export default {
         });
       }
     },
+    async fetchAreaCodes() {
+      try {
+        const response = await axios.get("http://localhost/api/spots/areacode");
+        this.areas = response.data.data;
+        console.log("Area codes fetched:", this.areas);
+      } catch (error) {
+        console.error("Error fetching area codes:", error);
+      }
+    },
+    async fetchGugunCodes() {
+      try {
+        const response = await axios.get(`http://localhost/api/spots/gungucode?areaCode=${this.selectedAreaCode}`);
+        this.guguns = response.data.data;
+        console.log("Gugun codes fetched:", this.guguns);
+      } catch (error) {
+        console.error("Error fetching gugun codes:", error);
+      }
+    },
   },
   watch: {
     spaces: {
@@ -262,6 +293,7 @@ export default {
   },
 };
 </script>
+
 
 <script setup>
 import { ref } from "vue";
