@@ -1,3 +1,166 @@
+<template>
+  <div class="container-makeplan">
+    <div class="left-box">
+      <!-- 위에 줄 -->
+      <div class="selectInfo">
+        <div class="d-flex mb-3">
+          <select
+            v-model="selectedValue1"
+            class="form-select custom-width-1 mr-2"
+            aria-label="Default select example"
+          >
+            <option value="" disabled>첫 번째 선택</option>
+            <option value="서울시특별시">서울시특별시</option>
+            <option value="인천광역시">인천광역시</option>
+            <option value="경기도">경기도</option>
+          </select>
+          <select
+            v-model="selectedValue2"
+            class="form-select custom-width-2 mr-2"
+            aria-label="Default select example"
+          >
+            <option value="" disabled>두 번째 선택</option>
+            <option value="영등포구">영등포구</option>
+            <option value="계양구">계양구</option>
+            <option value="강남구">강남구</option>
+          </select>
+        </div>
+
+        <!-- 아래 줄 -->
+        <div class="d-flex">
+          <input
+            type="text"
+            v-model="searchText"
+            class="custom-width-input flex-grow-1"
+            placeholder="검색어를 입력하세요"
+          />
+          <button
+            type="button"
+            class="btn btn-primary flex-shrink-0"
+            @click="search"
+            style="
+              background-color: #ffb108;
+              border-color: #ffb108;
+              margin-right: 10px;
+            "
+          >
+            검색
+          </button>
+        </div>
+      </div>
+      <div class="top-btn">
+        <v-item-group selected-class="bg-yellow" multiple>
+          <v-item
+            v-for="(category, index) in categories"
+            :key="index"
+            v-slot="{ selectedClass, toggle }"
+          >
+            <v-chip :class="selectedClass" @click="toggle">{{
+              category
+            }}</v-chip>
+          </v-item>
+        </v-item-group>
+      </div>
+      <button
+        v-for="(card, index) in cards"
+        :key="index"
+        type="button"
+        class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
+        :class="{ active: selectedCard === index }"
+        @click="handleCardClick(card)"
+        style="height: 8rem"
+      >
+        <div
+          class="card d-flex flex-row align-items-center"
+          :class="{ 'border-selected': selectedCard === index }"
+          style="width: 100%; height: 100%"
+        >
+          <!-- 이미지를 왼쪽에 위치시킵니다. -->
+          <div class="col-4">
+            <img
+              :src="card.imgSrc"
+              class="card-img-top"
+              alt="..."
+              style="width: 100%; height: 100%; margin-left: 15px"
+            />
+          </div>
+          <!-- 카드 바디를 오른쪽에 배치합니다. -->
+          <div
+            class="card-body col-8 d-flex justify-content-center align-items-center"
+          >
+            <p class="card-text">{{ card.description }}</p>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <div class="middle-box">
+      <div class="kakao-map-wrapper">
+        <KakaoMap width="100%" height="45rem" :lat="33.452" :lng="126.573">
+          <KakaoMapMarkerPolyline
+            :markerList="markerList"
+            :showMarkerOrder="true"
+            strokeColor="#C74C5E"
+            :strokeOpacity="1"
+            strokeStyle="shortdot"
+          />
+
+          <KakaoMapMarker
+            :lat="33.450705"
+            :lng="126.570667"
+            :image="newImage"
+            @onClickKakaoMapMarker="onClickKakaoMapMarker"
+            :clickable="true"
+          />
+        </KakaoMap>
+      </div>
+    </div>
+
+    <div class="right-box">
+      <div class="space-container">
+        <v-btn @click="addSpace" class="add-space-btn" style="margin-right: 10px; background-color: #ffc700;">일정 추가</v-btn>
+        <v-btn @click="addItemToLastSpace" class="add-item-btn" style="margin-right: 10px; background-color: #ffc700;"
+          >여행지 추가</v-btn
+        >
+        <v-btn @click="addItemToLastSpace" class="add-item-btn" style="margin-right: 10px; background-color: #ffc700;">등록</v-btn>
+        <div v-for="(space, index) in spaces" :key="index" class="space-item">
+          <h1>{{ space.title }}</h1>
+          <draggable
+            v-model="space.items"
+            tag="ul"
+            group="meals"
+            class="draggable-list"
+            :itemKey="(item) => item.name"
+          >
+            <template #item="{ element: meal }">
+              <li>{{ meal.name }}</li>
+            </template>
+          </draggable>
+        </div>
+      </div>
+      <v-card style="padding: 10px">
+        <v-tabs v-model="currentTab" bg-color="#ffb108">
+          <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
+            {{ tab.text }}
+          </v-tab>
+        </v-tabs>
+
+        <v-card-text>
+          <v-tabs-window v-model="currentTab">
+            <v-tabs-window-item
+              v-for="tab in tabs"
+              :key="tab.value"
+              :value="tab.value"
+            >
+              <input v-model="tab.inputText" placeholder="내용을 입력하세요" />
+            </v-tabs-window-item>
+          </v-tabs-window>
+        </v-card-text>
+      </v-card>
+    </div>
+  </div>
+</template>
+
 <script>
 import { ref, watch } from "vue";
 import draggable from "vuedraggable";
@@ -46,6 +209,18 @@ export default {
         },
         // 추가 카드 데이터...
       ],
+      tabs: [{ value: "tab1", text: "1일차", inputText: "" }],
+      currentTab: "tab1",
+      spaces: ref([
+        {
+          title: "1일차",
+          items: [
+            { name: "강남역" },
+            { name: "멀티캠퍼스" },
+            { name: "대림역" },
+          ],
+        },
+      ]),
     };
   },
   methods: {
@@ -58,43 +233,44 @@ export default {
       this.selectedCardDescription = card.description;
       this.visibleRight = true;
     },
+    addSpace() {
+      const newTitle = `${this.spaces.length + 1}일차`;
+      this.spaces.push({ title: newTitle, items: [] });
+      this.addTab(newTitle); // 새로운 공간 추가 시 탭도 추가
+    },
+    addTab(title) {
+      const newTabValue = `tab${this.tabs.length + 1}`;
+      this.tabs.push({ value: newTabValue, text: title, inputText: "" });
+      this.currentTab = newTabValue;
+    },
+    addItemToLastSpace() {
+      const lastSpace = this.spaces[this.spaces.length - 1];
+      if (lastSpace) {
+        lastSpace.items.push({
+          name: `새로운 여행지${lastSpace.items.length + 1}`,
+        });
+      }
+    },
+  },
+  watch: {
+    spaces: {
+      handler(newVal) {
+        console.log("Spaces updated:", newVal);
+      },
+      deep: true,
+    },
   },
 };
 </script>
 
 <script setup>
-import { ref, watch } from "vue";
-import draggable from "vuedraggable";
+import { ref } from "vue";
 import {
   KakaoMap,
   KakaoMapMarkerPolyline,
   KakaoMapMarker,
   KakaoMapCustomOverlay,
 } from "vue3-kakao-maps";
-
-// 초기 공간들
-const spaces = ref([
-  { title: "1일차", items: [{ name: "강남역" }, { name: "멀티캠퍼스" }, { name: "대림역" }] },
-]);
-
-// 새로운 공간 추가 함수
-const addSpace = () => {
-  spaces.value.push({ title: `${spaces.value.length + 1}일차`, items: [] });
-};
-
-// 마지막 공간에 요소 추가 함수
-const addItemToLastSpace = () => {
-  const lastSpace = spaces.value[spaces.value.length - 1];
-  if (lastSpace) {
-    lastSpace.items.push({ name: `새로운 여행지${lastSpace.items.length + 1}` });
-  }
-};
-
-// spaces가 변경될 때마다 새로운 값을 콘솔에 출력
-watch(spaces, (newVal) => {
-  console.log("Spaces updated:", newVal);
-}, { deep: true });
-
 /**
  * 해당 장소에 대한 세부 내용 Server로부터 받는다.
  * 받은 정보를 토대로 마커 띄우고 인포윈도우 띄운다.
@@ -125,6 +301,7 @@ const addMarker = () => {
     lat: 33.4509 + Math.random() * 0.003,
     lng: 126.571 + Math.random() * 0.003,
     image,
+    // orderBottomMargin: '40px'
   });
 };
 
@@ -132,135 +309,7 @@ const addMarker = () => {
 const deleteMarker = () => {
   markerList.value.pop();
 };
-
-// Define the onClickKakaoMapMarker method
-const onClickKakaoMapMarker = () => {
-  alert("Marker clicked!");
-};
 </script>
-
-<template>
-  <div class="container-makeplan">
-    <div class="left-box">
-      <!-- 위에 줄 -->
-      <div class="selectInfo">
-        <div class="d-flex mb-3">
-          <select
-            v-model="selectedValue1"
-            class="form-select custom-width-1 mr-2"
-            aria-label="Default select example"
-          >
-            <option value="" disabled>첫 번째 선택</option>
-            <option value="서울시특별시">서울시특별시</option>
-            <option value="인천광역시">인천광역시</option>
-            <option value="경기도">경기도</option>
-          </select>
-          <select
-            v-model="selectedValue2"
-            class="form-select custom-width-2 mr-2"
-            aria-label="Default select example"
-          >
-            <option value="" disabled>두 번째 선택</option>
-            <option value="영등포구">영등포구</option>
-            <option value="계양구">계양구</option>
-            <option value="강남구">강남구</option>
-          </select>
-        </div>
-
-        <!-- 아래 줄 -->
-        <div class="d-flex">
-          <input
-            type="text"
-            v-model="searchText"
-            class="custom-width-input"
-            placeholder="검색어를 입력하세요"
-          />
-          <button type="button" class="btn btn-primary" @click="search">
-            검색
-          </button>
-        </div>
-      </div>
-      <div class="top-btn">
-        <v-item-group selected-class="bg-yellow" multiple>
-          <v-item
-            v-for="(category, index) in categories"
-            :key="index"
-            v-slot="{ selectedClass, toggle }"
-          >
-            <v-chip :class="selectedClass" @click="toggle">{{ category }}</v-chip>
-          </v-item>
-        </v-item-group>
-      </div>
-      <button
-        v-for="(card, index) in cards"
-        :key="index"
-        type="button"
-        class="btn btn-secondary-card"
-        :class="{ active: selectedCard === index }"
-        @click="handleCardClick(card)"
-      >
-        <div
-          class="card"
-          :class="{ 'border-selected': selectedCard === index }"
-          style="width: 21rem"
-        >
-          <img
-            :src="card.imgSrc"
-            class="card-img-top"
-            alt="..."
-            height="100px"
-          />
-          <div class="card-body">
-            <p class="card-text">{{ card.description }}</p>
-          </div>
-        </div>
-      </button>
-    </div>
-
-    <div class="middle-box">
-      <div class="kakao-map-wrapper">
-        <KakaoMap width="100%" height="45rem" :lat="33.452" :lng="126.573">
-          <KakaoMapMarkerPolyline
-            :markerList="markerList"
-            :showMarkerOrder="true"
-            strokeColor="#C74C5E"
-            :strokeOpacity="1"
-            strokeStyle="shortdot"
-          />
-
-          <KakaoMapMarker
-            :lat="33.450705"
-            :lng="126.570667"
-            :image="newImage"
-            @onClickKakaoMapMarker="onClickKakaoMapMarker"
-            :clickable="true"
-          />
-        </KakaoMap>
-      </div>
-    </div>
-
-    <div class="right-box">
-      <div class="space-container">
-        <button @click="addSpace" class="add-space-btn">Add New Space</button>
-        <button @click="addItemToLastSpace" class="add-item-btn">Add Item to Last Space</button>
-        <div v-for="(space, index) in spaces" :key="index" class="space-item">
-          <h1>{{ space.title }}</h1>
-          <draggable
-            v-model="space.items"
-            tag="ul"
-            group="meals"
-            class="draggable-list"
-            :itemKey="item => item.name"
-          >
-            <template #item="{ element: meal }">
-              <li>{{ meal.name }}</li>
-            </template>
-          </draggable>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
 
 <style>
 @font-face {
@@ -277,25 +326,26 @@ const onClickKakaoMapMarker = () => {
 
 .container-makeplan {
   display: flex;
-  height: 100vh; /* 컨테이너를 화면의 높이만큼 설정합니다. */
+  height: 90vh; /* 컨테이너를 화면의 높이만큼 설정합니다. */
+  padding: 10px;
 }
 
 .left-box {
   flex: 1; /* 왼쪽 박스 */
-  border: 1px solid black;
+  border: 1px solid rgb(185, 184, 184);
   overflow-y: auto; /* 세로 스크롤을 활성화합니다. */
 }
 
 .middle-box {
   flex: 2; /* 가운데 박스 */
   margin: 0 10px; /* 가운데 박스를 좌우로 조금씩 여백을 줍니다. */
-  border: 1px solid black;
+  border: 1px solid rgb(185, 184, 184);
   overflow-y: auto; /* 세로 스크롤을 활성화합니다. */
 }
 
 .right-box {
   flex: 1; /* 오른쪽 박스 */
-  border: 1px solid black;
+  border: 1px solid rgb(185, 184, 184);
   overflow-y: auto; /* 세로 스크롤을 활성화합니다. */
 }
 
@@ -323,9 +373,15 @@ const onClickKakaoMapMarker = () => {
 
 .custom-width-input {
   width: 275px;
-  border: 1px solid black;
+  border: 1px solid rgb(165, 164, 164);
   margin-right: 8px;
 }
+
+/* .custom-width-input {
+  border: 1px solid black;
+  margin-right: 8px;
+  flex-grow: 1;
+} */
 
 .selectInfo {
   margin-left: 10px;
@@ -337,10 +393,6 @@ const onClickKakaoMapMarker = () => {
   margin-left: 10px;
 }
 
-.right-box {
-  flex: 1;
-  border: 1px solid black;
-}
 
 .space-container {
   margin: 10px;
@@ -381,4 +433,5 @@ const onClickKakaoMapMarker = () => {
   font-size: 1.5rem;
   margin-top: 1rem;
 }
+
 </style>

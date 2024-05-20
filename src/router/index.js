@@ -56,6 +56,12 @@ const router = createRouter({
       name:"planDetail",
       component: () => import("@/components/plan/PlanDetail.vue")
     }
+    ,
+    {
+      path: "/spotDetail",
+      name:"spotDetail",
+      component: () => import("@/components/spot_detail/SpotDetail.vue")
+    }
   ],
 });
 

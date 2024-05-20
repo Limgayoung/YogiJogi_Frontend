@@ -87,21 +87,16 @@ const cards = ref([
 <template>
   <v-row class="centered">
     <v-col cols="12">
-      <div style="display: flex; align-items: center">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
+      >
         <h3 class="custom-heading">여행 코스 둘러보기</h3>
-        <!-- <v-btn
-          variant="outlined"
-          class="custom-heading"
-          style="margin-left: 1050px"
-        >
-          여행 코스 만들기
-        </v-btn> -->
         <router-link to="/makePlan">
-          <v-btn
-            variant="outlined"
-            class="custom-heading"
-            style="margin-left: 1050px"
-          >
+          <v-btn variant="outlined" class="custom-heading" style="margin-right: 60px; background-color: #ffc700; color: white;">
             여행 코스 만들기
           </v-btn>
         </router-link>

@@ -56,8 +56,11 @@
                             <span class="text-primary text-subtitle-2">64 Reviews</span>
                         </v-card-title>
 
+
                         <v-overlay :model-value="isHovering" class="align-center justify-center" scrim="#ccc" contained>
+                            <router-link to="/spotDetail">
                             <v-btn class="moreInfo" variant="flat">상세 정보 보러가기</v-btn>
+                        </router-link>
                         </v-overlay>
                     </v-card>
                 </v-hover>

@@ -14,33 +14,68 @@
     </div>
 
     <div class="buttons">
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 80%;">
-                <div class="left_section">
-                    <button type="button" class="btn_good" onclick="setLike();">
-                        <span class="mdi mdi-heart-outline" style="font-size: 24px;"></span>
-                        <span class="num" id="conLike">0</span>
-                    </button>
-                    <span class="num_view"><em class="tit"><span class="mdi mdi-eye-outline"
-                                style="font-size: 24px;"></span></em><span class="num" id="conRead">904</span></span>
-                </div>
-                <div class="right_section">
-                    <button type="button" class="btn_bookmark" onclick="setFavoContentDetail();">
-                        <span class="mdi mdi-bookmark-outline" style="font-size: 24px;"></span>
-                    </button>
-                    <button type="button" class="btn_print" onclick="openPrint();" title="새창 열림">
-                        <span class="mdi mdi-printer-outline" style="font-size: 24px;"></span>
-                    </button>
-                    <button type="button" class="btn_cos" onclick="myCourseCartDetail('C','12','');">
-                        <span class="mdi mdi-map" style="font-size: 24px;"></span>
-                    </button>
-                    <button type="button" class="btn_sharing" onclick="openShare();">
-                        <span class="mdi mdi-share-variant-outline" style="font-size: 24px;"></span>
-                    </button>
-                </div>
-            </div>
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 80%;
+        "
+      >
+        <div class="left_section">
+          <button type="button" class="btn_good" onclick="setLike();">
+            <span class="mdi mdi-heart-outline" style="font-size: 24px"></span>
+            <span class="num" id="conLike">0</span>
+          </button>
+          <span class="num_view"
+            ><em class="tit"
+              ><span
+                class="mdi mdi-eye-outline"
+                style="font-size: 24px"
+              ></span></em
+            ><span class="num" id="conRead">904</span></span
+          >
+        </div>
+        <div class="right_section">
+          <button
+            type="button"
+            class="btn_bookmark"
+            onclick="setFavoContentDetail();"
+          >
+            <span
+              class="mdi mdi-bookmark-outline"
+              style="font-size: 24px"
+            ></span>
+          </button>
+          <button
+            type="button"
+            class="btn_print"
+            onclick="openPrint();"
+            title="새창 열림"
+          >
+            <span
+              class="mdi mdi-printer-outline"
+              style="font-size: 24px"
+            ></span>
+          </button>
+          <button
+            type="button"
+            class="btn_cos"
+            onclick="myCourseCartDetail('C','12','');"
+          >
+            <span class="mdi mdi-map" style="font-size: 24px"></span>
+          </button>
+          <button type="button" class="btn_sharing" onclick="openShare();">
+            <span
+              class="mdi mdi-share-variant-outline"
+              style="font-size: 24px"
+            ></span>
+          </button>
+        </div>
+      </div>
     </div>
-    
-    <hr>
+
+    <hr />
     <div class="kakao-map-wrapper-detail">
       <KakaoMap width="80%" height="25rem" :lat="33.452" :lng="126.573">
         <KakaoMapMarkerPolyline
@@ -84,6 +119,10 @@
         </v-stepper>
       </div>
     </div>
+    <v-row>
+      <div>🔎GPT로 여행 이동 경로 시간 알아보기</div>
+      <v-btn>click!</v-btn>
+    </v-row>
   </div>
 </template>
 
@@ -207,28 +246,28 @@ const onClickKakaoMapMarker = () => {
   margin-top: 70px;
 }
 
-.buttons{
-    margin-left: 300px;
+.buttons {
+  margin-left: 300px;
 }
 
 .right_section {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 
 .right_section button {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 .left_section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .left_section span,
 .left_section button {
-    margin-right: 10px;
-    /* 각 요소 사이의 오른쪽 여백 설정 */
+  margin-right: 10px;
+  /* 각 요소 사이의 오른쪽 여백 설정 */
 }
 </style>

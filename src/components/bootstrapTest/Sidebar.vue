@@ -22,11 +22,11 @@
     <div v-if="searchResult" class="search-result">
       {{ selectedValue1 }} {{ selectedValue2 }}
     </div>
-    <div class="container mt-3">
+    <div class="container-side mt-3">
       <div class="d-flex">
         <select
           v-model="selectedValue1"
-          class="form-select custom-width-1 mr-2"
+          class="form-select custom-width-1-side mr-2"
           aria-label="Default select example"
         >
           <option value="" disabled>첫 번째 선택</option>
@@ -36,7 +36,7 @@
         </select>
         <select
           v-model="selectedValue2"
-          class="form-select custom-width-2 mr-2"
+          class="form-select custom-width-2-side mr-2"
           aria-label="Default select example"
         >
           <option value="" disabled>두 번째 선택</option>
@@ -78,22 +78,29 @@
         v-for="(card, index) in cards"
         :key="index"
         type="button"
-        class="btn btn-secondary-card"
+        class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
         :class="{ active: selectedCard === index }"
         @click="handleCardClick(card)"
+        style="height: 7rem"
       >
         <div
-          class="card"
+          class="card d-flex flex-row align-items-center"
           :class="{ 'border-selected': selectedCard === index }"
-          style="width: 18rem"
+          style="width: 100%; height: 100%"
         >
-          <img
-            :src="card.imgSrc"
-            class="card-img-top"
-            alt="..."
-            height="100px"
-          />
-          <div class="card-body">
+          <!-- 이미지를 왼쪽에 위치시킵니다. -->
+          <div class="col-4">
+            <img
+              :src="card.imgSrc"
+              class="card-img-top"
+              alt="..."
+              style="width: 100%; height: 100%; margin-left: 15px"
+            />
+          </div>
+          <!-- 카드 바디를 오른쪽에 배치합니다. -->
+          <div
+            class="card-body col-8 d-flex justify-content-center align-items-center"
+          >
             <p class="card-text">{{ card.description }}</p>
           </div>
         </div>
@@ -204,6 +211,7 @@ const categories = [
 .sidebar2 {
   background-color: transparent;
   padding: 0px;
+  width: 24%;
   font-family: "GongGothicMedium";
 }
 
@@ -236,11 +244,12 @@ const categories = [
   margin-top: 10px;
 }
 
-.custom-width-1 {
+.custom-width-1-side {
+  margin-left: 10px;
   width: 35%;
   font-size: 12px;
 }
-.custom-width-2 {
+.custom-width-2-side {
   width: 35%;
   font-size: 12px;
 }
@@ -269,5 +278,8 @@ const categories = [
   top: 70px; /* 원하는 위치로 조정 */
   left: 380px; /* 원하는 위치로 조정 */
   z-index: 2;
+  margin-left: 10px;
 }
+
+
 </style>
