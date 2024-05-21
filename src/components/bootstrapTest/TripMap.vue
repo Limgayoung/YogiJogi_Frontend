@@ -25,6 +25,9 @@ const onLoadKakaoMap = (mapRef) => {
 };
 
 const setMarkers = (results) => {
+  if (!results || results.length === 0) {
+    return;
+  }
   if (map.value && bounds) {
     // 기존 마커 제거
     map.value.markers?.forEach(marker => marker.setMap(null));

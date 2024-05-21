@@ -69,8 +69,8 @@
             >
               <v-img :src="card.imageUrl" aspect-ratio="1.3"></v-img>
               <v-card-text>
-                <h2 class="cardSpotName">{{ card.name }}</h2>
-                <p class="cardSpotDes">{{ card.address }}</p>
+                <h2 class="cardSpotName">{{ card.spot.name }}</h2>
+                <p class="cardSpotDes">{{ card.spot.address }}</p>
               </v-card-text>
               <v-card-title>
                 <span class="text-primary text-subtitle-2">64 Reviews</span>
@@ -110,8 +110,8 @@
             >
               <v-img :src="card.imageUrl" aspect-ratio="1.3"></v-img>
               <v-card-text>
-                <h2 class="cardSpotName">{{ card.name }}</h2>
-                <p class="cardSpotDes">{{ card.address }}</p>
+                <h2 class="cardSpotName">{{ card.spot.name }}</h2>
+                <p class="cardSpotDes">{{ card.spot.address }}</p>
               </v-card-text>
               <v-card-title>
                 <span class="text-primary text-subtitle-2">64 Reviews</span>
@@ -149,8 +149,8 @@
             >
               <v-img :src="card.imageUrl" aspect-ratio="1.3"></v-img>
               <v-card-text>
-                <h2 class="cardSpotName">{{ card.name }}</h2>
-                <p class="cardSpotDes">{{ card.address }}</p>
+                <h2 class="cardSpotName">{{ card.spot.name }}</h2>
+                <p class="cardSpotDes">{{ card.spot.address }}</p>
               </v-card-text>
               <v-overlay
                 :model-value="isHovering"
@@ -185,37 +185,14 @@ const sido = ref(['전국', '서울', '인천', '경기', '강원', '대전', '�
 const selectedArea = ref(sido.value[0]); // 첫 번째 요소를 기본 선택 값으로 설정
 const cards = ref([]);
 
-// Unsplash API 사용을 위한 함수
-const fetchImageForCard = async (query) => {
-  try {
-    const response = await axios.get('https://api.unsplash.com/search/photos', {
-      params: {
-        query,
-        client_id: 'sh42zFTHOB_ZtH6DcCTEqcbhgeNnjDQhDS6mo_TrC1g', // 여기에 본인의 Unsplash API 키를 넣으세요
-        per_page: 1
-      }
-    });
-    return response.data.results[0].urls.small;
-  } catch (error) {
-    console.error("Error fetching image from Unsplash:", error);
-    return null;
-  }
-};
+
 
 const fetchTopSpots = async () => {
   try {
     const response = await axios.get('http://localhost/api/spots/top/4');
     const spots = response.data.data;
-    
-    // 카드 데이터를 업데이트하며 이미지 URL을 추가합니다.
-    for (const spot of spots) {
-      const imageUrl = await fetchImageForCard(spot.name);
-      cards.value.push({
-        ...spot,
-        imageUrl
-      });
-    }
 
+    cards.value = spots;
     console.log(`받은 cards의 수: ${cards.value.length}`); // 받은 cards의 수를 콘솔에 출력
     console.log(`cards 데이터:`, cards.value); // 받은 cards의 데이터를 콘솔에 출력
   } catch (error) {
