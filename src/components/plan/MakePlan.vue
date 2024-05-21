@@ -5,40 +5,42 @@
       <div class="selectInfo">
         <div class="d-flex mb-3">
           <select
-          v-model="selectedAreaCode"
-          class="form-select custom-width-1-side mr-2"
-          aria-label="Default select example"
-          @change="fetchGugunCodes"
-        >
-          <option value="" disabled>첫 번째 선택</option>
-          <option v-for="area in areas" :key="area.code" :value="area.code">
-            {{ area.name }}
-          </option>
-        </select>
-        <select
-          v-model="selectedGugunCode"
-          class="form-select custom-width-2-side mr-2"
-          aria-label="Default select example"
-        >
-          <option value="" disabled>두 번째 선택</option>
-          <option v-for="gugun in guguns" :key="gugun.code" :value="gugun.code">
-            {{ gugun.name }}
-          </option>
-        </select>
+            v-model="selectedAreaCode"
+            class="form-select custom-width-1-side mr-2"
+            aria-label="Default select example"
+            @change="fetchGugunCodes"
+          >
+            <option value="" disabled>첫 번째 선택</option>
+            <option v-for="area in areas" :key="area.code" :value="area.code">
+              {{ area.name }}
+            </option>
+          </select>
+          <select
+            v-model="selectedGugunCode"
+            class="form-select custom-width-2-side mr-2"
+            aria-label="Default select example"
+          >
+            <option value="" disabled>두 번째 선택</option>
+            <option
+              v-for="gugun in guguns"
+              :key="gugun.code"
+              :value="gugun.code"
+            >
+              {{ gugun.name }}
+            </option>
+          </select>
         </div>
-
-        <!-- 아래 줄 -->
         <div class="d-flex">
           <input
             type="text"
             v-model="searchText"
-            class="custom-width-input flex-grow-1"
+            class="custom-width-input-side flex-grow-1"
             placeholder="검색어를 입력하세요"
           />
           <button
             type="button"
             class="btn btn-primary flex-shrink-0"
-            @click="search"
+            @click="fetchSearchResults()"
             style="
               background-color: #ffb108;
               border-color: #ffb108;
@@ -62,68 +64,104 @@
           </v-item>
         </v-item-group>
       </div>
-      <button
-        v-for="(card, index) in cards"
-        :key="index"
-        type="button"
-        class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
-        :class="{ active: selectedCard === index }"
-        @click="handleCardClick(card)"
-        style="height: 8rem"
-      >
-        <div
-          class="card d-flex flex-row align-items-center"
-          :class="{ 'border-selected': selectedCard === index }"
-          style="width: 100%; height: 100%"
+      <div v-if="cards.length > 0">
+        <button
+          v-for="(card, index) in cards"
+          :key="index"
+          type="button"
+          class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
+          :class="{ active: selectedCard === index }"
+          @click="handleCardClick(card)"
+          style="height: 7rem"
         >
-          <!-- 이미지를 왼쪽에 위치시킵니다. -->
-          <div class="col-4">
-            <img
-              :src="card.imgSrc"
-              class="card-img-top"
-              alt="..."
-              style="width: 100%; height: 100%; margin-left: 15px"
-            />
-          </div>
-          <!-- 카드 바디를 오른쪽에 배치합니다. -->
+          <!-- 이미지를 왼쪽에 위치시키고 카드 바디를 오른쪽에 배치합니다. -->
           <div
-            class="card-body col-8 d-flex justify-content-center align-items-center"
+            class="card d-flex flex-row align-items-center"
+            :class="{ 'border-selected': selectedCard === index }"
+            style="width: 100%; height: 100%"
           >
-            <p class="card-text">{{ card.description }}</p>
+            <div class="col-4">
+              <!-- 조건부 렌더링 -->
+              <template v-if="card.spot.images && card.spot.images.length > 0">
+                <img
+                  :src="card.spot.images[0].imgSrc"
+                  class="card-img-top"
+                  alt="..."
+                  style="width: 100%; height: 100%; margin-left: 15px"
+                />
+              </template>
+              <template v-else>
+                <img
+                  src="@/assets/images/noimg.jpg"
+                  class="card-img-top"
+                  alt="No Image"
+                  style="width: 100%; height: 100%; margin-left: 15px"
+                />
+              </template>
+              <!-- /조건부 렌더링 -->
+            </div>
+            <div
+              class="card-body col-8 d-flex justify-content-center align-items-center"
+            >
+              <p class="card-text">{{ card.spot.name }}</p>
+            </div>
           </div>
-        </div>
-      </button>
+        </button>
+      </div>
     </div>
 
     <div class="middle-box">
       <div class="kakao-map-wrapper">
-        <KakaoMap width="100%" height="45rem" :lat="33.452" :lng="126.573">
-          <KakaoMapMarkerPolyline
-            :markerList="markerList"
-            :showMarkerOrder="true"
-            strokeColor="#C74C5E"
-            :strokeOpacity="1"
-            strokeStyle="shortdot"
-          />
-
+        <KakaoMap
+          width="100%"
+          height="45rem"
+          :lat="mapCenter.lat"
+          :lng="mapCenter.lng"
+        >
           <KakaoMapMarker
-            :lat="33.450705"
-            :lng="126.570667"
-            :image="newImage"
+            :lat="currentMarker.lat"
+            :lng="currentMarker.lng"
             @onClickKakaoMapMarker="onClickKakaoMapMarker"
             :clickable="true"
           />
+          <KakaoMapCustomOverlay
+            :lat="infoWindow.lat"
+            :lng="infoWindow.lng"
+            :yAnchor="1.4"
+            @onLoadKakaoMapCustomOverlay="onLoadKakaoMapCustomOverlay"
+          >
+            <div class="info-window">
+              <!-- 인포 윈도우의 내용을 여기에서 사용자 정의할 수 있습니다 -->
+              <p>{{ infoWindow.title }}</p>
+              <p>{{ infoWindow.address }}</p>
+              <span style="float: right; cursor: pointer" @click="closeOverlay" title="닫기">X</span>
+
+            </div>
+          </KakaoMapCustomOverlay>
         </KakaoMap>
       </div>
     </div>
 
     <div class="right-box">
       <div class="space-container">
-        <v-btn @click="addSpace" class="add-space-btn" style="margin-right: 10px; background-color: #ffc700;">일정 추가</v-btn>
-        <v-btn @click="addItemToLastSpace" class="add-item-btn" style="margin-right: 10px; background-color: #ffc700;"
+        <v-btn
+          @click="addSpace"
+          class="add-space-btn"
+          style="margin-right: 10px; background-color: #ffc700"
+          >일정 추가</v-btn
+        >
+        <v-btn
+          @click="addItemToLastSpace"
+          class="add-item-btn"
+          style="margin-right: 10px; background-color: #ffc700"
           >여행지 추가</v-btn
         >
-        <v-btn @click="addItemToLastSpace" class="add-item-btn" style="margin-right: 10px; background-color: #ffc700;">등록</v-btn>
+        <v-btn
+          @click="addItemToLastSpace"
+          class="add-item-btn"
+          style="margin-right: 10px; background-color: #ffc700"
+          >등록</v-btn
+        >
         <div v-for="(space, index) in spaces" :key="index" class="space-item">
           <h1>{{ space.title }}</h1>
           <draggable
@@ -162,9 +200,8 @@
   </div>
 </template>
 
-<script>
-import { ref, watch } from "vue";
-import { defineComponent } from "vue";
+<script setup>
+import { ref, watch, onMounted, computed } from "vue";
 import axios from "axios";
 import draggable from "vuedraggable";
 import {
@@ -174,173 +211,184 @@ import {
   KakaoMapCustomOverlay,
 } from "vue3-kakao-maps";
 
-export default {
-  data() {
-    return {
-      selectedAreaCode: null,
-      selectedGugunCode: null,
-      searchResult: null,
-      areas: [],
-      guguns: [],
-      selectedAreaName: "",
-      selectedGugunName: "",
-      selectedValue1: null,
-      selectedValue2: null,
-      searchText: "",
-      selectedCard: null,
-      categories: [
-        "🌄 관광지",
-        "📖 문화시설",
-        "👨‍👩‍👧‍👦 행사",
-        "🏀 레포츠",
-        "👜 쇼핑",
-        "🍴 음식점",
-      ],
-      cards: [
-        {
-          imgSrc:
-            "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
-          description: "카드1",
-        },
-        {
-          imgSrc:
-            "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
-          description: "카드2",
-        },
-        {
-          imgSrc:
-            "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
-          description: "카드3",
-        },
-        {
-          imgSrc:
-            "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
-          description: "카드4",
-        },
-        // 추가 카드 데이터...
-      ],
-      tabs: [{ value: "tab1", text: "1일차", inputText: "" }],
-      currentTab: "tab1",
-      spaces: ref([
-        {
-          title: "1일차",
-          items: [
-            { name: "강남역" },
-            { name: "멀티캠퍼스" },
-            { name: "대림역" },
-          ],
-        },
-      ]),
-    };
-  },
-  mounted() {
-    this.fetchAreaCodes();
-  },
-  methods: {
-    search() {
-      console.log("Selected Value 1:", this.selectedValue1);
-      console.log("Selected Value 2:", this.selectedValue2);
-      console.log("Search Text:", this.searchText);
-    },
-    handleCardClick(card) {
-      this.selectedCardDescription = card.description;
-      this.visibleRight = true;
-    },
-    addSpace() {
-      const newTitle = `${this.spaces.length + 1}일차`;
-      this.spaces.push({ title: newTitle, items: [] });
-      this.addTab(newTitle); // 새로운 공간 추가 시 탭도 추가
-    },
-    addTab(title) {
-      const newTabValue = `tab${this.tabs.length + 1}`;
-      this.tabs.push({ value: newTabValue, text: title, inputText: "" });
-      this.currentTab = newTabValue;
-    },
-    addItemToLastSpace() {
-      const lastSpace = this.spaces[this.spaces.length - 1];
-      if (lastSpace) {
-        lastSpace.items.push({
-          name: `새로운 여행지${lastSpace.items.length + 1}`,
-        });
-      }
-    },
-    async fetchAreaCodes() {
-      try {
-        const response = await axios.get("http://localhost/api/spots/areacode");
-        this.areas = response.data.data;
-        console.log("Area codes fetched:", this.areas);
-      } catch (error) {
-        console.error("Error fetching area codes:", error);
-      }
-    },
-    async fetchGugunCodes() {
-      try {
-        const response = await axios.get(`http://localhost/api/spots/gungucode?areaCode=${this.selectedAreaCode}`);
-        this.guguns = response.data.data;
-        console.log("Gugun codes fetched:", this.guguns);
-      } catch (error) {
-        console.error("Error fetching gugun codes:", error);
-      }
-    },
-  },
-  watch: {
-    spaces: {
-      handler(newVal) {
-        console.log("Spaces updated:", newVal);
-      },
-      deep: true,
-    },
-  },
-};
-</script>
+onMounted(() => {
+  fetchAreaCodes();
+});
 
-
-<script setup>
-import { ref } from "vue";
-import {
-  KakaoMap,
-  KakaoMapMarkerPolyline,
-  KakaoMapMarker,
-  KakaoMapCustomOverlay,
-} from "vue3-kakao-maps";
-/**
- * 해당 장소에 대한 세부 내용 Server로부터 받는다.
- * 받은 정보를 토대로 마커 띄우고 인포윈도우 띄운다.
- * 사이드바의 추가 버튼으로 여행 계획에 해당 장소를 추가할 수 있다.
- */
-const image = {
-  imageSrc: "src/assets/images/marker/15.png",
-  imageWidth: 30,
-  imageHeight: 40,
-};
-
-const newImage = {
-  imageSrc: "src/assets/images/marker/12.png",
-  imageWidth: 30,
-  imageHeight: 40,
-};
-
-const markerList = ref([
-  { lat: 33.4509, lng: 126.571, image, order: "출발" },
-  { lat: 33.451, lng: 126.572, image },
-  { lat: 33.452, lng: 126.573, image },
-  { lat: 33.4518, lng: 126.5725, image },
+const selectedAreaCode = ref(null);
+const selectedGugunCode = ref(null);
+const searchResult = ref(null);
+const cards = ref([]);
+const areas = ref([]);
+const guguns = ref([]);
+const selectedAreaName = ref("");
+const selectedGugunName = ref("");
+const selectedValue1 = ref(null);
+const selectedValue2 = ref(null);
+const searchText = ref("");
+const selectedCard = ref(null);
+const selectedCardDescription = ref("");
+const visibleRight = ref(false);
+const categories = ref([
+  "🌄 관광지",
+  "📖 문화시설",
+  "👨‍👩‍👧‍👦 행사",
+  "🏀 레포츠",
+  "👜 쇼핑",
+  "🍴 음식점",
 ]);
 
-// 마커 추가하기 버튼의 함수입니다
-const addMarker = () => {
-  markerList.value.push({
-    lat: 33.4509 + Math.random() * 0.003,
-    lng: 126.571 + Math.random() * 0.003,
-    image,
-    // orderBottomMargin: '40px'
-  });
+const mapCenter = ref({ lat: 37.5665, lng: 126.978 }); // 서울의 위도와 경도
+const currentMarker = ref({
+  lat: 0,
+  lng: 0,
+  title: "",
+  address: "",
+});
+
+const infoWindow = ref({
+  lat: 0,
+  lng: 0,
+  title: "",
+  address: "",
+});
+
+const visible = ref(false);
+const onClickKakaoMapMarker = () => {
+  visible.value = !visible.value;
 };
 
-// 마커 삭제하기 버튼의 함수입니다
-const deleteMarker = () => {
-  markerList.value.pop();
+const tabs = ref([{ value: "tab1", text: "1일차", inputText: "" }]);
+const currentTab = ref("tab1");
+const spaces = ref([
+  {
+    title: "1일차",
+    items: [{ name: "강남역" }, { name: "멀티캠퍼스" }, { name: "대림역" }],
+  },
+]);
+
+// const map = ref();
+// const overlay = ref();
+
+// const onLoadKakaoMapCustomOverlay = (newCustomOverlay) => {
+//   overlay.value = newCustomOverlay;
+// };
+// const closeOverlay = () => {
+//   overlay?.value?.setMap(null);
+// };
+// const onClickKakaoMapMarker = () => {
+//   map.value && overlay?.value?.setMap(map.value);
+// };
+
+const addSpace = () => {
+  const newTitle = `${spaces.value.length + 1}일차`;
+  spaces.value.push({ title: newTitle, items: [] });
+  addTab(newTitle); // 새로운 공간 추가 시 탭도 추가
 };
+
+const addTab = (title) => {
+  const newTabValue = `tab${tabs.value.length + 1}`;
+  tabs.value.push({ value: newTabValue, text: title, inputText: "" });
+  currentTab.value = newTabValue;
+};
+
+const addItemToLastSpace = () => {
+  const lastSpace = spaces.value[spaces.value.length - 1];
+  if (lastSpace) {
+    lastSpace.items.push({
+      name: `새로운 여행지${lastSpace.items.length + 1}`,
+    });
+  }
+};
+
+const fetchSearchResults = async () => {
+  try {
+    const url = `http://localhost/api/spots/title/${encodeURIComponent(
+      searchText.value
+    )}/region?areaCode=${selectedAreaCode.value}&gunguCode=${
+      selectedGugunCode.value
+    }&offset=0&limit=15`;
+    const response = await axios.get(url);
+    console.log(url);
+    const data = response.data.data;
+
+    console.log(data);
+    // cards 값 설정
+    cards.value = data;
+    console.log(cards.value);
+    // searchResults 값 설정
+  } catch (error) {
+    console.error("Error searching:", error);
+  }
+};
+
+const fetchAreaCodes = async () => {
+  try {
+    const response = await axios.get("http://localhost/api/spots/areacode");
+    areas.value = response.data.data;
+    console.log("Area codes fetched:", areas.value);
+  } catch (error) {
+    console.error("Error fetching area codes:", error);
+  }
+};
+
+const fetchGugunCodes = async () => {
+  try {
+    const response = await axios.get(
+      `http://localhost/api/spots/gungucode?areaCode=${selectedAreaCode.value}`
+    );
+    guguns.value = response.data.data;
+    console.log("Gugun codes fetched:", guguns.value);
+  } catch (error) {
+    console.error("Error fetching gugun codes:", error);
+  }
+};
+
+const handleCardClick = (card) => {
+  console.log(card.spot.latitude, card.spot.longitude);
+  if (card.spot.latitude && card.spot.longitude) {
+    currentMarker.value = {
+      lat: card.spot.latitude,
+      lng: card.spot.longitude,
+      title: card.spot.name,
+      address: card.spot.address,
+    };
+    mapCenter.value = {
+      lat: card.spot.latitude,
+      lng: card.spot.longitude,
+    };
+    infoWindow.value = {
+      lat: card.spot.latitude,
+      lng: card.spot.longitude,
+      title: card.spot.name,
+      address: card.spot.address,
+    };
+    console.log(currentMarker.value);
+    //overlay.value && overlay.value.setMap(map.value);
+  }
+};
+
+// const handleMarkerClick = (marker) => {
+//   console.log("maker: " + marker);
+//   if (marker.lat && marker.lng) {
+//     infoWindow.value = {
+//       lat: marker.lat,
+//       lng: marker.lng,
+//       title: marker.title,
+//       address: marker.address,
+//       visible: true,
+//     };
+//     mapCenter.value = { lat: marker.lat, lng: marker.lng };
+//   }
+// };
+
+const spacesWatcher = watch(
+  spaces,
+  (newVal) => {
+    console.log("Spaces updated:", newVal);
+  },
+  { deep: true }
+);
 </script>
 
 <style>
@@ -379,6 +427,11 @@ const deleteMarker = () => {
   flex: 1; /* 오른쪽 박스 */
   border: 1px solid rgb(185, 184, 184);
   overflow-y: auto; /* 세로 스크롤을 활성화합니다. */
+}
+
+.custom-width-input-side {
+  border: 1px solid rgb(189, 185, 185);
+  margin-right: 10px;
 }
 
 .select-boxes {
@@ -425,7 +478,6 @@ const deleteMarker = () => {
   margin-left: 10px;
 }
 
-
 .space-container {
   margin: 10px;
 }
@@ -466,4 +518,10 @@ const deleteMarker = () => {
   margin-top: 1rem;
 }
 
+.info-window {
+  background-color: white;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
 </style>
