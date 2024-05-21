@@ -32,7 +32,10 @@
       </div>
 
       <div class="form-group">
-        <label for="loginId">아이디</label>
+        <div class="id-input-group">
+          <label for="loginId">아이디</label>
+          <button @click="idcheck" class="idcheck">아이디 중복 체크</button>
+        </div>
         <input
           type="text"
           ref="loginId"
@@ -115,6 +118,7 @@
 <script setup>
 import axios from "axios";
 import { onMounted, ref } from "vue";
+import router from "@/router";
 
 const isOpen = ref(false);
 const message = ref("");
@@ -208,6 +212,7 @@ const checkForm = async () => {
     // 성공적으로 회원가입이 처리되었음을 사용자에게 알릴 수 있습니다.
     message.value = "회원가입이 완료되었습니다.";
     isOpenToggle();
+    router.push({ name: 'login' });
   } catch (error) {
     // 오류 발생 시 처리할 내용
     console.error("Error during signup:", error);
@@ -216,6 +221,26 @@ const checkForm = async () => {
     isOpenToggle();
   }
 };
+
+const idcheck = async () => {
+  event.preventDefault();
+  try {
+    const response = await axios.get(
+      `http://localhost/api/users/check/loginId?loginId=${formData.value.loginId}`
+    );
+    if (response.data.data) {
+      alert("이미 사용 중인 아이디입니다.");
+      formData.value.loginId = "";
+    } else {
+      alert("사용 가능한 아이디입니다.");
+    }
+  } catch (error) {
+    console.error("Error checking ID availability:", error);
+    alert("아이디 중복 체크를 실패했습니다.");
+  }
+};
+
+
 </script>
 
 <style>
@@ -281,7 +306,9 @@ const checkForm = async () => {
   margin-left: 10px;
 }
 
+.idcheck,
 .btn_wrap button {
+  font-family: "GongGothicMedium";
   border: 2px solid #ccc;
   border-radius: 5px;
   padding: 5px 10px;
@@ -366,6 +393,7 @@ const checkForm = async () => {
   border-radius: 5px;
   padding: 5px 10px;
   cursor: pointer;
+  margin-top: 10px;
 }
 
 .submit:hover {
@@ -382,5 +410,25 @@ const checkForm = async () => {
 .joinform {
   width: 40%;
   margin: 15px auto;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.id-input-group {
+  display: flex;
+  align-items: center;
+}
+
+.idcheck {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"]{
+  margin-bottom: 10px; /* 원하는 값으로 조정하세요 */
 }
 </style>

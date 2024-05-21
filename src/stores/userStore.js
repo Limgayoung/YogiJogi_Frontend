@@ -16,6 +16,7 @@ export const useUserStore = defineStore("user", {
         );
         this.user = response.data.data.userId;
         this.jwtToken = response.data.data.jwtToken;
+        
         console.log(this.jwtToken);
         return response.data;
       } catch (error) {
@@ -26,6 +27,7 @@ export const useUserStore = defineStore("user", {
     async logout() {
       this.user = null;
       this.jwtToken = null;
+      this.userInfo = null;
     },
     async fetchUserInfo() {
       try {
@@ -33,25 +35,15 @@ export const useUserStore = defineStore("user", {
           method: "get",
           url: `http://localhost/api/users/${this.user}`,
           headers: {
-               Authorization: `${this.jwtToken.accessToken}`,
+            Authorization: `${this.jwtToken.accessToken}`,
           },
         };
 
-        // 요청 내용을 로그로 출력
-          console.log("Axios Request Config:", config);
-          
-        console.log(this.jwtToken.accessToken);
-        // const response = await axios.get(
-        //   `http://localhost/api/users/${this.user}`,
-        //   {
-        //     headers: {
-        //       Authorization: `${this.jwtToken.accessToken}`,
-        //     },
-        //   }
-        //   );
-          const response = await axios.get(config);
-          console.log("response: "+response);
-        this.userInfo = response.data;
+        console.log("Axios Request Config:", config);
+
+        const response = await axios(config);
+        console.log("response:", response.data);
+        this.userInfo = response.data.data;
       } catch (error) {
         console.error("사용자 정보 요청 오류:", error);
         throw error;
@@ -64,11 +56,11 @@ export const useUserStore = defineStore("user", {
   persist: {
     enabled: true,
     strategies: [
-      {
-        key: 'auth',
+      { 
+        key: 'user',
         storage: localStorage,
+        paths: ['user', 'jwtToken'] // 저장할 상태 지정
       },
     ],
   },
-  
 });

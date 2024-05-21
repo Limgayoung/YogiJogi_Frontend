@@ -5,114 +5,111 @@
     </div>
 
     <v-card class="mx-auto pa-12 pb-8" elevation="8" max-width="448" rounded="lg">
-      <div class="input-group">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="basic-addon1">
-            <i class="mdi mdi-account"></i>
-          </span>
-        </div>
-        <input
-          v-model="userInfo.loginId"
-          type="text"
-          class="form-control"
-          placeholder="Email address"
-          aria-label="Email address"
-          aria-describedby="basic-addon1"
-          disabled
-        />
-      </div>
+      <v-text-field
+        v-model="userInfo.loginId"
+        label="아이디"
+        prepend-inner-icon="mdi-account"
+        disabled
+        class="mt-3"
+      ></v-text-field>
 
-      <div class="input-group mt-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="basic-addon2">
-            <i class="mdi mdi-account-circle"></i>
-          </span>
-        </div>
-        <input
-          v-model="userInfo.name"
-          type="text"
-          class="form-control"
-          placeholder="Name"
-          aria-label="Name"
-          aria-describedby="basic-addon2"
-        />
-      </div>
+      <v-text-field
+        v-model="userInfo.name"
+        label="이름"
+        prepend-inner-icon="mdi-account-circle"
+        class="mt-3"
+      ></v-text-field>
 
-      <div class="input-group mt-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="basic-addon3">
-            <i class="mdi mdi-email"></i>
-          </span>
-        </div>
-        <input
-          v-model="userInfo.email"
-          type="email"
-          class="form-control"
-          placeholder="Email"
-          aria-label="Email"
-          aria-describedby="basic-addon3"
-        />
-      </div>
+      <v-text-field
+        v-model="userInfo.email"
+        label="이메일"
+        prepend-inner-icon="mdi-email"
+        class="mt-3"
+      ></v-text-field>
 
-      <div class="input-group mt-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="basic-addon4">
-            <i class="mdi mdi-account-circle-outline"></i>
-          </span>
-        </div>
-        <input
-          v-model="userInfo.nickName"
-          type="text"
-          class="form-control"
-          placeholder="Nickname"
-          aria-label="Nickname"
-          aria-describedby="basic-addon4"
-        />
-      </div>
+      <v-text-field
+        v-model="userInfo.nickName"
+        label="닉네임"
+        prepend-inner-icon="mdi-account-circle-outline"
+        class="mt-3"
+      ></v-text-field>
 
-      <v-btn @click="updateUserInfo" class="mb-8" color="primary" size="large" variant="outlined" block>
-        수정 완료
-      </v-btn>
+      <v-row class="mt-8">
+        <v-col cols="6">
+          <v-btn @click="updateUserInfo" class="mb-8" color="primary" size="large" block>
+            수정 완료
+          </v-btn>
+        </v-col>
+        <v-col cols="6">
+          <v-btn @click="withdraw" class="mb-8" color="error" size="large" block>
+            탈퇴
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-card>
   </div>
 </template>
-
-<script>
-import { ref, onMounted } from 'vue';
+<script setup>
+import { reactive, onMounted } from 'vue';
 import { useUserStore } from '@/stores/userStore.js';
+import axios from 'axios';
+import router from "@/router";
 
-export default {
-  setup() {
-    const userInfo = ref({
-      loginId: '',
-      name: '',
-      email: '',
-      nickName: ''
-    });
-    const userStore = useUserStore();
+const userStore = useUserStore();
 
-    const updateUserInfo = async () => {
-      try {
-        await userStore.updateUserInfo(userInfo.value);
-      } catch (error) {
-        console.error('사용자 정보 업데이트 오류:', error);
-        alert('사용자 정보를 업데이트하는 데 실패했습니다. 다시 시도해주세요.');
+const userInfo = reactive({
+  loginId: '',
+  name: '',
+  email: '',
+  nickName: ''
+});
+
+const updateUserInfo = async () => {
+  try {
+    // API로 수정된 정보를 보낼 준비
+    const userData = {
+      userId: userStore.user, // 현재 로그인한 사용자의 ID
+      name: userInfo.name,
+      nickName: userInfo.nickName,
+      email: userInfo.email
+    };
+    // API로 PUT 요청 보내기
+    await axios.put(`http://localhost/api/users`, userData, {
+      headers: {
+        Authorization: `${userStore.jwtToken.accessToken}`
       }
-    };
-
-    onMounted(() => {
-      userStore.fetchUserInfo();
-      console.log(userInfo);
     });
-
-    return {
-      userInfo,
-      updateUserInfo
-    };
-  },
+    alert('사용자 정보가 업데이트되었습니다.');
+  } catch (error) {
+    console.error('사용자 정보 업데이트 오류:', error);
+    alert('사용자 정보를 업데이트하는 데 실패했습니다. 다시 시도해주세요.');
+  }
 };
-</script>
 
+const withdraw = async () => {
+  try {
+    // 탈퇴 요청 보내기
+    await axios.delete(`http://localhost/api/users/${userStore.user}`, {
+      headers: {
+        Authorization: `${userStore.jwtToken.accessToken}`
+      }
+    });
+    alert('회원 탈퇴가 완료되었습니다.');
+    // 로그아웃 처리
+    await userStore.logout();
+    router.push({ name: 'main' });
+  } catch (error) {
+    console.error('회원 탈퇴 오류:', error);
+    alert('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
+  }
+};
+
+
+onMounted(async () => {
+  await userStore.fetchUserInfo();
+  Object.assign(userInfo, userStore.userInfo); // userInfo를 userStore.userInfo로 업데이트
+});
+</script>
 <style scoped>
 .container {
   font-family: "GongGothicMedium";
@@ -127,58 +124,11 @@ export default {
   text-align: center;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-.btn-primary:focus,
-.btn-primary.focus {
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
-}
-
-.text-blue {
-  color: #007bff;
-}
-
-.text-blue:hover {
-  color: #0056b3;
-}
-
-.text-decoration-none {
-  text-decoration: none;
-}
-
 .mt-3 {
   margin-top: 1rem;
 }
 
-.input-group {
-  width: 100%;
-}
-
-.input-group-text {
-  background-color: #fff;
-  border: 1px solid #ced4da;
-  color: #495057;
-}
-
-.input-group-text i {
-  font-size: 1rem;
-}
-
-.form-control {
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-}
-
-.form-control:focus {
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.mb-8 {
+  margin-bottom: 2rem;
 }
 </style>

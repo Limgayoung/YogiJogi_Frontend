@@ -19,29 +19,24 @@
             <router-link class="nav-link" to="/">홈</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/bootstrapTest"
-              >여행지도</router-link
-            >
+            <router-link class="nav-link" to="/bootstrapTest">여행지도</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" to="/plan">여행코스</router-link>
           </li>
           <li class="nav-item">
-            <router-link v-if="!isAuthenticated" class="nav-link" to="/login"
-              >로그인</router-link
-            >
-            <router-link v-else class="nav-link" to="/mypage"
-              >마이페이지</router-link
-            >
+            <router-link v-if="!isAuthenticated" class="nav-link" to="/login">로그인</router-link>
+            <router-link v-else class="nav-link" to="/mypage">마이페이지</router-link>
           </li>
           <li>
             <router-link
               v-if="isAuthenticated"
-              @click="logout_nav"
+              @click="logoutNav"
               to="/"
               class="nav-link"
-              >로그아웃</router-link
             >
+              로그아웃
+            </router-link>
           </li>
         </ul>
       </div>
@@ -49,34 +44,18 @@
   </nav>
 </template>
 
-<script>
-import { computed } from "vue";
-import { useUserStore } from "../stores/userStore";
+<script setup>
+import { computed } from 'vue';
+import { useUserStore } from '../stores/userStore';
 
-export default {
-  setup() {
-    const userStore = useUserStore();
-    const isAuthenticated = computed(() => userStore.isAuthenticated);
-    console.log("asd", isAuthenticated);
-    const user = computed(() => userStore.user);
+const userStore = useUserStore();
+const isAuthenticated = computed(() => userStore.isAuthenticated);
+const user = computed(() => userStore.user);
 
-    const logout_nav = async () => {
-      const userStore = useUserStore();
-      await userStore.logout();
-    };
-
-    return {
-      isAuthenticated,
-      user,
-      logout_nav
-    };
-  },
+const logoutNav = async () => {
+  await userStore.logout();
 };
 </script>
-
-<style scoped>
-/* 스타일 생략 */
-</style>
 
 <style scoped>
 .navbar-nav {
@@ -85,8 +64,7 @@ export default {
 
 @font-face {
   font-family: "GongGothicMedium";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
-    format("woff");
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }

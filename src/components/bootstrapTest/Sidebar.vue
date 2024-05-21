@@ -99,7 +99,6 @@
   </div>
   <div class="top-btn">
     <v-item-group selected-class="bg-yellow" multiple>
-      <!-- <div class="text-caption mb-2">Tags</div> -->
       <v-item
         v-for="(category, index) in categories"
         :key="index"
@@ -111,92 +110,85 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import axios from "axios";
-import Sidebar from "primevue/sidebar";
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import Sidebar from 'primevue/sidebar';
 
-export default defineComponent({
-  name: "SidebarComponent",
-  components: {
-    Sidebar,
+const selectedAreaCode = ref(null);
+const selectedGugunCode = ref(null);
+const searchResult = ref(null);
+const areas = ref([]);
+const guguns = ref([]);
+const selectedAreaName = ref('');
+const selectedGugunName = ref('');
+const buttons = ref(["추천테마", "인기장소", "여행코스", "나의여행"]);
+const selectedButton = ref(0);
+const selectedCard = ref(null);
+const selectedCardDescription = ref('');
+const visibleRight = ref(false);
+const tags = ref(["#가족과함께", "#연인과함께", "#반려동물과함께", "#친구와함께"]);
+const categories = ref(["🌄 관광지", "📖 문화시설", "👨‍👩‍👧‍👦 행사", "🏀 레포츠", "👜 쇼핑", "🍴 음식점"]);
+const cards = ref([
+  {
+    imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
+    description: "카드1",
   },
-  data() {
-    return {
-      selectedAreaCode: null,
-      selectedGugunCode: null,
-      searchResult: null,
-      areas: [],
-      guguns: [],
-      selectedAreaName: "",
-      selectedGugunName: "",
-      buttons: ["추천테마", "인기장소", "여행코스", "나의여행"],
-      selectedButton: 0,
-      selectedCard: null,
-      selectedCardDescription: "",
-      visibleRight: false,
-      tags: ["#가족과함께", "#연인과함께", "#반려동물과함께", "#친구와함께"],
-      categories: ["🌄 관광지", "📖 문화시설", "👨‍👩‍👧‍👦 행사", "🏀 레포츠", "👜 쇼핑", "🍴 음식점"],
-      cards: [
-        {
-          imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
-          description: "카드1",
-        },
-        {
-          imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
-          description: "카드2",
-        },
-        {
-          imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
-          description: "카드3",
-        },
-        {
-          imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
-          description: "카드4",
-        },
-        // 추가 카드 데이터...
-      ],
-    };
+  {
+    imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
+    description: "카드2",
   },
-  mounted() {
-    this.fetchAreaCodes();
+  {
+    imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
+    description: "카드3",
   },
-  methods: {
-    selectButton(index) {
-      this.selectedButton = index;
-      this.$emit("open-sidebar", this.buttons[index]);
-    },
-    handleCardClick(card) {
-      this.selectedCardDescription = card.description;
-      this.visibleRight = true;
-    },
-    async fetchAreaCodes() {
-      try {
-        const response = await axios.get("http://localhost/api/spots/areacode");
-        this.areas = response.data.data;
-      } catch (error) {
-        console.error("Error fetching area codes:", error);
-      }
-    },
-    async fetchGugunCodes() {
-      try {
-        const response = await axios.get(`http://localhost/api/spots/gungucode?areaCode=${this.selectedAreaCode}`);
-        this.guguns = response.data.data;
-      } catch (error) {
-        console.error("Error fetching gugun codes:", error);
-      }
-    },
-    search() {
-      if (this.selectedAreaCode && this.selectedGugunCode) {
-        this.selectedAreaName = this.areas.find(area => area.code === this.selectedAreaCode)?.name || "";
-        this.selectedGugunName = this.guguns.find(gugun => gugun.code === this.selectedGugunCode)?.name || "";
-        this.searchResult = `${this.selectedAreaName} - ${this.selectedGugunName}에 대한 검색 결과가 여기에 나타납니다.`;
-      } else {
-        this.searchResult = "먼저 두 가지를 선택해주세요.";
-      }
-    },
+  {
+    imgSrc: "https://cdn.visitkorea.or.kr/img/call?cmd=VIEW&id=cbeefd27-1f65-4a07-8f16-6705807bae9d",
+    description: "카드4",
   },
+  // 추가 카드 데이터...
+]);
+
+onMounted(() => {
+  fetchAreaCodes();
 });
+
+const selectButton = (index) => {
+  selectedButton.value = index;
+};
+
+const handleCardClick = (card) => {
+  selectedCardDescription.value = card.description;
+  visibleRight.value = true;
+};
+
+const fetchAreaCodes = async () => {
+  try {
+    const response = await axios.get("http://localhost/api/spots/areacode");
+    areas.value = response.data.data;
+  } catch (error) {
+    console.error("Error fetching area codes:", error);
+  }
+};
+
+const fetchGugunCodes = async () => {
+  try {
+    const response = await axios.get(`http://localhost/api/spots/gungucode?areaCode=${selectedAreaCode.value}`);
+    guguns.value = response.data.data;
+  } catch (error) {
+    console.error("Error fetching gugun codes:", error);
+  }
+};
+
+const search = () => {
+  if (selectedAreaCode.value && selectedGugunCode.value) {
+    selectedAreaName.value = areas.value.find(area => area.code === selectedAreaCode.value)?.name || "";
+    selectedGugunName.value = guguns.value.find(gugun => gugun.code === selectedGugunCode.value)?.name || "";
+    searchResult.value = `${selectedAreaName.value} - ${selectedGugunName.value}에 대한 검색 결과가 여기에 나타납니다.`;
+  } else {
+    searchResult.value = "먼저 두 가지를 선택해주세요.";
+  }
+};
 </script>
 
 <style scoped>

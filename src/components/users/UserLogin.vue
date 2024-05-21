@@ -48,57 +48,46 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore.js';
 
-export default {
-  setup() {
-    const loginId = ref('');
-    const password = ref('');
-    const visible = ref(false);
-    const router = useRouter();
-    const userStore = useUserStore();
+const loginId = ref('');
+const password = ref('');
+const visible = ref(false);
+const router = useRouter();
+const userStore = useUserStore();
 
-    const handleLogin = async () => {
-      try {
-        const credentials = {
-          loginId: loginId.value,
-          password: password.value,
-        };
-        await userStore.login(credentials);
-        console.log(credentials);
-        console.log('로그인 성공:', userStore.user);
-        router.push('/');
-      } catch (error) {
-        console.error('로그인 오류:', error);
-        alert('로그인에 실패했습니다. 다시 시도해주세요.');
-      }
+const handleLogin = async () => {
+  try {
+    const credentials = {
+      loginId: loginId.value,
+      password: password.value,
     };
-
-    return {
-      loginId,
-      password,
-      visible,
-      handleLogin,
-    };
-  },
+    await userStore.login(credentials);
+    console.log(credentials);
+    console.log('로그인 성공:', userStore.user);
+    router.push('/');
+  } catch (error) {
+    console.error('로그인 오류:', error);
+    alert('로그인에 실패했습니다. 다시 시도해주세요.');
+  }
 };
 </script>
 
 <style scoped>
 @font-face {
   font-family: "GongGothicMedium";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
-    format("woff");
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
+
 .container {
   font-family: "GongGothicMedium";
 }
-/* 원하는 요소에 폰트를 적용합니다. */
+
 .text-subtitle-1,
 .text-blue,
 .font-gothic-medium,
