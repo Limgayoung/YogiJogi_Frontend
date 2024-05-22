@@ -52,15 +52,15 @@
         </div>
       </div>
       <div class="top-btn">
-        <v-item-group selected-class="bg-yellow" multiple>
+        <v-item-group v-model="selectedCategory" selected-class="bg-yellow">
           <v-item
             v-for="(category, index) in categories"
             :key="index"
             v-slot="{ selectedClass, toggle }"
           >
-            <v-chip :class="selectedClass" @click="toggle">{{
-              category
-            }}</v-chip>
+            <v-chip :class="selectedClass" @click="() => handleCategoryClick(category.id, toggle)">
+              {{ category.name }}
+            </v-chip>
           </v-item>
         </v-item-group>
       </div>
@@ -279,23 +279,31 @@ const selectedGugunCode = ref(null);
 const cards = ref([]);
 const areas = ref([]);
 const guguns = ref([]);
-const markerList = ref([
-]);
-
+const markerList = ref([]);
+const selectedCategory = ref(null);
+const selectedCategoryContentId = ref(null);
 const searchText = ref("");
 const selectedCard = ref(null);
 const categories = ref([
-  "🌄 관광지",
-  "📖 문화시설",
-  "👨‍👩‍👧‍👦 행사",
-  "🏀 레포츠",
-  "👜 쇼핑",
-  "🍴 음식점",
+  { name: "🌄 관광지", id: 12 },
+  { name: "📖 문화시설", id: 14 },
+  { name: "👨‍👩‍👧‍👦 행사", id: 15 },
+  { name: "🏀 레포츠", id: 28 },
+  { name: "👜 쇼핑", id: 38 },
+  { name: "🍴 음식점", id: 39 },
 ]);
 
 watch(markerList, (newVal) => {
   console.log("Marker list updated:", newVal);
 });
+
+const handleCategoryClick = (category, toggle) => {
+  console.log("cid " + category);
+  selectedCategory.value = category;
+  selectedCategoryContentId.value = category;
+  console.log(selectedCategory.value);
+  toggle();
+};
 
 const mapCenter = ref({ lat: 37.5665, lng: 126.978 }); // 서울의 위도와 경도
 const currentMarker = ref({
@@ -403,24 +411,22 @@ const removeItem = (spaceIndex, mealIndex) => {
   }
 };
 
-// const addItemToLastSpace = () => {
-//   const lastSpace = spaces.value[spaces.value.length - 1];
-//   if (lastSpace) {
-//     lastSpace.items.push({
-//       name: `새로운 여행지${lastSpace.items.length + 1}`,
-//     });
-//   }
-// };
-
 const fetchSearchResults = async () => {
   try {
-    const url = `http://localhost/api/spots/title/${encodeURIComponent(
-      searchText.value
-    )}/region?areaCode=${selectedAreaCode.value}&gunguCode=${
-      selectedGugunCode.value
-    }&offset=0&limit=15`;
-    const response = await axios.get(url);
-    console.log(url);
+    const url = `http://localhost/api/spots/search`;
+    const params = {
+      areaCode: selectedAreaCode.value,
+      gunguCode: selectedGugunCode.value,
+      title: searchText.value,
+      contentTypeId : selectedCategoryContentId.value,
+      offset: 0,
+      limit: 15
+    };
+
+    console.log("params :" +selectedCategory.value);
+    console.log(params);
+    const response = await axios.get(url, { params });
+    console.log(url, params);
     const data = response.data.data;
 
     console.log(data);
@@ -479,30 +485,6 @@ const handleCardClick = (card) => {
     //overlay.value && overlay.value.setMap(map.value);
   }
 };
-
-// const handleMarkerClick = (marker) => {
-//   console.log("maker: " + marker);
-//   if (marker.lat && marker.lng) {
-//     infoWindow.value = {
-//       lat: marker.lat,
-//       lng: marker.lng,
-//       title: marker.title,
-//       address: marker.address,
-//       visible: true,
-//     };
-//     mapCenter.value = { lat: marker.lat, lng: marker.lng };
-//   }
-// };
-
-// const addMarkerToItinerary = () => {
-//   const lastSpace = spaces.value[spaces.value.length - 1];
-//   if (lastSpace) {
-//     lastSpace.items.push({
-//       name: currentMarker.value.title,
-//       id: currentMarker.value.id,
-//     });
-//   }
-// };
 
 const spacesWatcher = watch(
   spaces,
