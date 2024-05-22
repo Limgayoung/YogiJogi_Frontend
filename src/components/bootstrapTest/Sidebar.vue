@@ -184,7 +184,7 @@
             />
             <img
               v-else
-              src="@/assets/images/noimg.jpg"
+              src="@/assets/images/noimg.png"
               class="card-img-top"
               alt="No Image"
               style="width: 100%; height: 100%; margin-left: 15px"
@@ -241,7 +241,7 @@
                 </template>
                 <template v-else>
                   <img
-                    src="@/assets/images/noimg.jpg"
+                    src="@/assets/images/noimg.png"
                     class="card-img-top"
                     alt="No Image"
                     style="width: 100%; height: 100%; margin-left: 15px"

@@ -1,5 +1,11 @@
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
+
+const router = useRouter();
+const userStore = useUserStore();
+
 const cards = ref([
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
@@ -14,12 +20,12 @@ const cards = ref([
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "경복궁",
-    description: "서울특별시 종로구 사직로 161",
+    description: "서울특별자치구 종로구 사직로 161",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "섭지코지",
-    description: "제주특별자치도 서귀포시 성산읍 섭지코지로",
+    description: "제주특별자치구 서귀포시 성산읍 섭지코지로",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
@@ -29,17 +35,17 @@ const cards = ref([
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "문래창작촌",
-    description: "서울특별시 영등포구 문래동3가 54-37",
+    description: "서울특별자치구 영등포구 문래동3가 54-37",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "경복궁",
-    description: "서울특별시 종로구 사직로 161",
+    description: "서울특별자치구 종로구 사직로 161",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "섭지코지",
-    description: "제주특별자치도 서귀포시 성산읍 섭지코지로",
+    description: "제주특별자치구 서귀포시 성산읍 섭지코지로",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
@@ -49,17 +55,17 @@ const cards = ref([
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "문래창작촌",
-    description: "서울특별시 영등포구 문래동3가 54-37",
+    description: "서울특별자치구 영등포구 문래동3가 54-37",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "경복궁",
-    description: "서울특별시 종로구 사직로 161",
+    description: "서울특별자치구 종로구 사직로 161",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "섭지코지",
-    description: "제주특별자치도 서귀포시 성산읍 섭지코지로",
+    description: "제주특별자치구 서귀포시 성산읍 섭지코지로",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
@@ -69,19 +75,27 @@ const cards = ref([
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "문래창작촌",
-    description: "서울특별시 영등포구 문래동3가 54-37",
+    description: "서울특별자치구 영등포구 문래동3가 54-37",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "경복궁",
-    description: "서울특별시 종로구 사직로 161",
+    description: "서울특별자치구 종로구 사직로 161",
   },
   {
     imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
     name: "섭지코지",
-    description: "제주특별자치도 서귀포시 성산읍 섭지코지로",
+    description: "제주특별자치구 서귀포시 성산읍 섭지코지로",
   },
 ]);
+
+const handleMakePlanClick = () => {
+  if (userStore.isAuthenticated) {
+    router.push("/makePlan");
+  } else {
+    router.push("/login");
+  }
+};
 </script>
 
 <template>
@@ -95,11 +109,14 @@ const cards = ref([
         "
       >
         <h3 class="custom-heading">여행 코스 둘러보기</h3>
-        <router-link to="/makePlan">
-          <v-btn variant="outlined" class="custom-heading" style="margin-right: 60px; background-color: #ffc700; color: white;">
-            여행 코스 만들기
-          </v-btn>
-        </router-link>
+        <v-btn
+          variant="outlined"
+          class="custom-heading"
+          style="margin-right: 60px; background-color: #ffc700; color: white;"
+          @click="handleMakePlanClick"
+        >
+          여행 코스 만들기
+        </v-btn>
       </div>
       <br />
     </v-col>

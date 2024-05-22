@@ -72,7 +72,7 @@
           class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
           :class="{ active: selectedCard === index }"
           @click="handleCardClick(card)"
-          style="height: 7rem"
+          style="height: 7rem; width: 100%"
         >
           <!-- 이미지를 왼쪽에 위치시키고 카드 바디를 오른쪽에 배치합니다. -->
           <div
@@ -87,15 +87,27 @@
                   :src="card.spot.images[0].imgSrc"
                   class="card-img-top"
                   alt="..."
-                  style="width: 100%; height: 100%; margin-left: 15px"
+                  style="
+                    width: auto;
+                    max-width: 100%;
+                    height: auto;
+                    max-height: 100%;
+                    margin-left: 15px;
+                  "
                 />
               </template>
               <template v-else>
                 <img
-                  src="@/assets/images/noimg.jpg"
+                  src="@/assets/images/noimg.png"
                   class="card-img-top"
                   alt="No Image"
-                  style="width: 100%; height: 100%; margin-left: 15px"
+                  style="
+                    width: 80px;
+                    max-width: 100%;
+                    height: auto;
+                    max-height: 100%;
+                    margin-left: 15px;
+                  "
                 />
               </template>
               <!-- /조건부 렌더링 -->
@@ -128,14 +140,24 @@
             :lat="infoWindow.lat"
             :lng="infoWindow.lng"
             :yAnchor="1.4"
-            @onLoadKakaoMapCustomOverlay="onLoadKakaoMapCustomOverlay"
           >
             <div class="info-window">
               <!-- 인포 윈도우의 내용을 여기에서 사용자 정의할 수 있습니다 -->
-              <p>{{ infoWindow.title }}</p>
-              <p>{{ infoWindow.address }}</p>
-              <span style="float: right; cursor: pointer" @click="closeOverlay" title="닫기">X</span>
-
+              <div style="font-size: 15px">{{ infoWindow.title }}</div>
+              <div style="font-size: 13px">{{ infoWindow.address }}</div>
+              <!-- <span style="float: right; cursor: pointer" @click="closeOverlay" title="닫기">X</span> -->
+              <button
+                @click="addMarkerToItinerary"
+                style="
+                  font-size: 13px;
+                  background-color: #ffc700;
+                  border: none;
+                  padding: 5px;
+                  cursor: pointer;
+                "
+              >
+                여행지 추가
+              </button>
             </div>
           </KakaoMapCustomOverlay>
         </KakaoMap>
@@ -150,12 +172,19 @@
           style="margin-right: 10px; background-color: #ffc700"
           >일정 추가</v-btn
         >
-        <v-btn
+        <!-- <v-btn
           @click="addItemToLastSpace"
           class="add-item-btn"
           style="margin-right: 10px; background-color: #ffc700"
           >여행지 추가</v-btn
+        > -->
+        <v-btn
+          @click="removeSpace"
+          class="add-space-btn"
+          style="margin-right: 10px; background-color: #ffc700"
         >
+          일정 삭제
+        </v-btn>
         <v-btn
           @click="addItemToLastSpace"
           class="add-item-btn"
@@ -171,12 +200,33 @@
             class="draggable-list"
             :itemKey="(item) => item.name"
           >
-            <template #item="{ element: meal }">
-              <li>{{ meal.name }}</li>
+            <template #item="{ element: meal, index: mealIndex }">
+              <li
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                {{ meal.name }}
+                <v-btn
+                  icon
+                  @click="removeItem(index, mealIndex)"
+                  style="
+                    background-color: #ffc700;
+                    color: white;
+                    width: 25px;
+                    height: 25px;
+                  "
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </li>
             </template>
           </draggable>
         </div>
       </div>
+
       <v-card style="padding: 10px">
         <v-tabs v-model="currentTab" bg-color="#ffb108">
           <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
@@ -244,6 +294,7 @@ const currentMarker = ref({
   lng: 0,
   title: "",
   address: "",
+  id: null,
 });
 
 const infoWindow = ref({
@@ -263,22 +314,9 @@ const currentTab = ref("tab1");
 const spaces = ref([
   {
     title: "1일차",
-    items: [{ name: "강남역" }, { name: "멀티캠퍼스" }, { name: "대림역" }],
+    items: [],
   },
 ]);
-
-// const map = ref();
-// const overlay = ref();
-
-// const onLoadKakaoMapCustomOverlay = (newCustomOverlay) => {
-//   overlay.value = newCustomOverlay;
-// };
-// const closeOverlay = () => {
-//   overlay?.value?.setMap(null);
-// };
-// const onClickKakaoMapMarker = () => {
-//   map.value && overlay?.value?.setMap(map.value);
-// };
 
 const addSpace = () => {
   const newTitle = `${spaces.value.length + 1}일차`;
@@ -286,10 +324,30 @@ const addSpace = () => {
   addTab(newTitle); // 새로운 공간 추가 시 탭도 추가
 };
 
+const removeSpace = () => {
+  if (spaces.value.length > 0) {
+    spaces.value.pop(); // 배열의 마지막 항목 제거
+    removeTab();
+  }
+};
+
 const addTab = (title) => {
   const newTabValue = `tab${tabs.value.length + 1}`;
   tabs.value.push({ value: newTabValue, text: title, inputText: "" });
   currentTab.value = newTabValue;
+};
+
+const removeTab = () => {
+  if (tabs.value.length > 0) {
+    tabs.value.pop(); // 배열의 마지막 탭 제거
+  }
+};
+
+const removeItem = (spaceIndex, mealIndex) => {
+  const space = spaces.value[spaceIndex];
+  if (space && space.items) {
+    space.items.splice(mealIndex, 1);
+  }
 };
 
 const addItemToLastSpace = () => {
@@ -352,6 +410,7 @@ const handleCardClick = (card) => {
       lng: card.spot.longitude,
       title: card.spot.name,
       address: card.spot.address,
+      id: card.spot.id,
     };
     mapCenter.value = {
       lat: card.spot.latitude,
@@ -381,6 +440,16 @@ const handleCardClick = (card) => {
 //     mapCenter.value = { lat: marker.lat, lng: marker.lng };
 //   }
 // };
+
+const addMarkerToItinerary = () => {
+  const lastSpace = spaces.value[spaces.value.length - 1];
+  if (lastSpace) {
+    lastSpace.items.push({
+      name: currentMarker.value.title,
+      id: currentMarker.value.id,
+    });
+  }
+};
 
 const spacesWatcher = watch(
   spaces,

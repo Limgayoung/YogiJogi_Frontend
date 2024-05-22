@@ -1,7 +1,14 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-      <router-link class="navbar-brand" to="/">요기조기</router-link>
+      <router-link class="navbar-brand" to="/">
+        <img
+          src="@/assets/images/noimg.png"
+          alt="No Image"
+          style="width: 50px; height: 50px; margin-left: 15px"
+        />
+        요기조기</router-link
+      >
       <button
         class="navbar-toggler"
         type="button"
@@ -19,14 +26,20 @@
             <router-link class="nav-link" to="/">홈</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/bootstrapTest">여행지도</router-link>
+            <router-link class="nav-link" to="/bootstrapTest"
+              >여행지도</router-link
+            >
           </li>
           <li class="nav-item">
             <router-link class="nav-link" to="/plan">여행코스</router-link>
           </li>
           <li class="nav-item">
-            <router-link v-if="!isAuthenticated" class="nav-link" to="/login">로그인</router-link>
-            <router-link v-else class="nav-link" to="/mypage">마이페이지</router-link>
+            <router-link v-if="!isAuthenticated" class="nav-link" to="/login"
+              >로그인</router-link
+            >
+            <router-link v-else class="nav-link" to="/mypage"
+              >마이페이지</router-link
+            >
           </li>
           <li>
             <router-link
@@ -45,8 +58,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useUserStore } from '../stores/userStore';
+import { computed } from "vue";
+import { useUserStore } from "../stores/userStore";
 
 const userStore = useUserStore();
 const isAuthenticated = computed(() => userStore.isAuthenticated);
@@ -64,7 +77,8 @@ const logoutNav = async () => {
 
 @font-face {
   font-family: "GongGothicMedium";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
+    format("woff");
   font-weight: normal;
   font-style: normal;
 }
