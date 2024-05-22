@@ -32,7 +32,7 @@
                   >
                     <v-scroll-y-transition>
                       <div class="local flex-grow-1 text-center font-size">
-                        {{ area }}
+                        {{ area.name }}
                       </div>
                     </v-scroll-y-transition>
                   </v-card>
@@ -82,7 +82,9 @@
                 contained
               >
                 <router-link to="/spotDetail">
-                  <v-btn class="moreInfo" variant="flat">상세 정보 보러가기</v-btn>
+                  <v-btn class="moreInfo" variant="flat"
+                    >상세 정보 보러가기</v-btn
+                  >
                 </router-link>
               </v-overlay>
             </v-card>
@@ -122,12 +124,14 @@
                 scrim="#ccc"
                 contained
               >
-                <v-btn class="moreInfo" variant="flat">상세 정보 보러가기</v-btn>
+                <v-btn class="moreInfo" variant="flat"
+                  >상세 정보 보러가기</v-btn
+                >
               </v-overlay>
             </v-card>
           </v-hover>
         </v-col>
-        <v-col cols="12">
+        <!-- <v-col cols="12">
           <h3 class="custom-heading">🔥인기글</h3>
           <br />
         </v-col>
@@ -162,7 +166,7 @@
               </v-overlay>
             </v-card>
           </v-hover>
-        </v-col>
+        </v-col> -->
       </v-row>
     </body>
   </div>
@@ -173,23 +177,41 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 const colors = ref([
-  'indigo',
-  'warning',
-  'pink darken-2',
-  'red lighten-1',
-  'deep-purple accent-4',
+  "indigo",
+  "warning",
+  "pink darken-2",
+  "red lighten-1",
+  "deep-purple accent-4",
 ]);
 
-const slides = ref(['여행지이름1', '여행지이름2', '여행지이름3', '여행지이름4', '여행지이름5']);
-const sido = ref(['전국', '서울', '인천', '경기', '강원', '대전', '부산', '대구', '광주', '제주', '전라']);
+const slides = ref([
+  "여행지이름1",
+  "여행지이름2",
+  "여행지이름3",
+  "여행지이름4",
+  "여행지이름5",
+]);
+const sido = ref([
+  { name: "전국", sido_code: 0 },
+  { name: "서울", sido_code: 1 },
+  { name: "인천", sido_code: 2 },
+  { name: "경기", sido_code: 31 },
+  { name: "강원", sido_code: 32 },
+  { name: "충북", sido_code: 33 },
+  { name: "충남", sido_code: 34 },
+  { name: "경북", sido_code: 35 },
+  { name: "경남", sido_code: 36 },
+  { name: "전북", sido_code: 37 },
+  { name: "전남", sido_code: 38 },
+  { name: "제주", sido_code: 39 },
+]);
+
 const selectedArea = ref(sido.value[0]); // 첫 번째 요소를 기본 선택 값으로 설정
 const cards = ref([]);
 
-
-
 const fetchTopSpots = async () => {
   try {
-    const response = await axios.get('http://localhost/api/spots/top/4');
+    const response = await axios.get("http://localhost/api/spots/top/4");
     const spots = response.data.data;
 
     cards.value = spots;
@@ -200,103 +222,107 @@ const fetchTopSpots = async () => {
   }
 };
 
+// const fetchTopCourses = async () => {
+//   try {
+//     const response
+//   }
+// }
+
 onMounted(() => {
   fetchTopSpots();
 });
 
 const viewDetails = (index) => {
-  console.log('Details for slide:', index + 1);
+  console.log("Details for slide:", index + 1);
 };
 </script>
 
-  
-  <style>
-  @font-face {
-    font-family: "GongGothicMedium";
-    src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
-      format("woff");
-    font-weight: normal;
-    font-style: normal;
-  }
-  
-  /* carousel 안 텍스트 */
-  .spotname {
-    font-family: "GongGothicMedium";
-    font-size: 60px;
-  }
-  
-  /* carousel 안 자세히 보기 버튼 */
-  .detail-button {
-    font-family: "GongGothicMedium";
-    position: absolute;
-    bottom: 40px;
-    right: 40px;
-    padding: 15px 30px;
-    background-color: #ffc700;
-    color: #fff;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 18px;
-    transition: background-color 0.3s;
-  }
-  
-  /* 자세히 보기 버튼 마우스 오버 */
-  .detail-button:hover {
-    font-family: "GongGothicMedium";
-    background-color: #006769;
-  }
-  
-  /* 지역 태그 텍스트 */
-  .local {
-    font-family: "GongGothicMedium";
-    font-size: 18px;
-  }
-  
-  /* 카드 안 여행지 이름 */
-  .cardSpotName {
-    font-family: "GongGothicMedium";
-    font-size: 15px;
-    color: #ffb108;
-  }
-  
-  /* 카드 안 여행지 설명 */
-  .cardSpotDes {
-    font-family: "GongGothicMedium";
-    font-size: 13px;
-  }
-  
-  /* 새로운 클래스 card-wrapper에 테두리와 동그란 모서리 스타일 추가 */
-  .card-wrapper {
-    max-width: 200px;
-    border-radius: 15px;
-    overflow: hidden;
-  }
-  
-  .card-wrapper:hover {
-    border-color: #007bff;
-    transform: scale(1.05);
-  }
-  
-  /* 상세 정보 버튼 스타일 */
-  .moreInfo {
-    font-family: "GongGothicMedium";
-    font-size: 40px;
-    min-width: 200px;
-    min-height: 50px;
-  }
-  
-  .centered {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .custom-heading {
-    font-family: "GongGothicMedium";
-    margin-left: 50px;
-    margin-top: 20px;
-    margin-bottom: -20px;
-  }
-  </style>
-  
+<style>
+@font-face {
+  font-family: "GongGothicMedium";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* carousel 안 텍스트 */
+.spotname {
+  font-family: "GongGothicMedium";
+  font-size: 60px;
+}
+
+/* carousel 안 자세히 보기 버튼 */
+.detail-button {
+  font-family: "GongGothicMedium";
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  padding: 15px 30px;
+  background-color: #ffc700;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background-color 0.3s;
+}
+
+/* 자세히 보기 버튼 마우스 오버 */
+.detail-button:hover {
+  font-family: "GongGothicMedium";
+  background-color: #006769;
+}
+
+/* 지역 태그 텍스트 */
+.local {
+  font-family: "GongGothicMedium";
+  font-size: 18px;
+}
+
+/* 카드 안 여행지 이름 */
+.cardSpotName {
+  font-family: "GongGothicMedium";
+  font-size: 15px;
+  color: #ffb108;
+}
+
+/* 카드 안 여행지 설명 */
+.cardSpotDes {
+  font-family: "GongGothicMedium";
+  font-size: 13px;
+}
+
+/* 새로운 클래스 card-wrapper에 테두리와 동그란 모서리 스타일 추가 */
+.card-wrapper {
+  max-width: 200px;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.card-wrapper:hover {
+  border-color: #007bff;
+  transform: scale(1.05);
+}
+
+/* 상세 정보 버튼 스타일 */
+.moreInfo {
+  font-family: "GongGothicMedium";
+  font-size: 40px;
+  min-width: 200px;
+  min-height: 50px;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-heading {
+  font-family: "GongGothicMedium";
+  margin-left: 50px;
+  margin-top: 20px;
+  margin-bottom: -20px;
+}
+</style>

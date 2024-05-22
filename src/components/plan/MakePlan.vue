@@ -82,15 +82,15 @@
           >
             <div class="col-4">
               <!-- 조건부 렌더링 -->
-              <template v-if="card.spot.images && card.spot.images.length > 0">
+              <template v-if="card.imgUrl">
                 <img
-                  :src="card.spot.images[0].imgSrc"
+                  :src="card.imgUrl"
                   class="card-img-top"
                   alt="..."
                   style="
-                    width: auto;
+                    width: 130px;
                     max-width: 100%;
-                    height: auto;
+                    height: 70px;
                     max-height: 100%;
                     margin-left: 15px;
                   "
