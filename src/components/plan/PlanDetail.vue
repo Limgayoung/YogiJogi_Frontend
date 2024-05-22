@@ -1,3 +1,98 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { useRoute } from "vue-router";
+import {
+  KakaoMap,
+  KakaoMapMarkerPolyline,
+  KakaoMapMarker,
+} from "vue3-kakao-maps";
+
+const route = useRoute();
+const travelPlan = ref({
+  title: '',
+  startDate: '',
+  endDate: '',
+  nickname: '',
+  theme: '',
+  views: 0,
+});
+const spaces = ref([]);
+const markerList = ref([]);
+
+const image = {
+  imageSrc: "src/assets/images/marker/15.png",
+  imageWidth: 30,
+  imageHeight: 40,
+};
+
+const newImage = {
+  imageSrc: "src/assets/images/marker/12.png",
+  imageWidth: 30,
+  imageHeight: 40,
+};
+
+const fetchPlanDetails = async () => {
+  const id = route.params.id;
+  try {
+    const response = await axios.get(`http://localhost/api/trips/search/${id}`);
+    console.log(response);
+    const data = response.data.data;
+    travelPlan.value = {
+      title: data.title,
+      startDate: data.createdAt,
+      endDate: data.updatedAt,
+      nickname: data.userName,
+      theme: data.tripThemeId,
+      views: data.views,
+    };
+    spaces.value = data.schedules.map(schedule => ({
+      title: `Day ${schedule.dateSequence}`,
+      items: [
+        {
+          name: schedule.spotInfo.spot.name,
+        }
+      ],
+      content: schedule.spotInfo.spot.address,
+    }));
+    markerList.value = data.schedules.map(schedule => ({
+      lat: schedule.spotInfo.spot.latitude,
+      lng: schedule.spotInfo.spot.longitude,
+      image,
+      order: schedule.scheduleSequence.toString(),
+    }));
+  } catch (error) {
+    console.error("Error fetching travel plan details:", error);
+  }
+};
+
+onMounted(fetchPlanDetails);
+
+const setLike = () => {
+  // 좋아요 버튼 클릭 처리 로직
+};
+
+const setFavoContentDetail = () => {
+  // 북마크 버튼 클릭 처리 로직
+};
+
+const openPrint = () => {
+  // 인쇄 버튼 클릭 처리 로직
+};
+
+const myCourseCartDetail = (type, id, other) => {
+  // 코스 버튼 클릭 처리 로직
+};
+
+const openShare = () => {
+  // 공유 버튼 클릭 처리 로직
+};
+
+const onClickKakaoMapMarker = () => {
+  alert("Marker clicked!");
+};
+</script>
+
 <template>
   <div class="container-plan-detail">
     <div class="text-center mb-4">
@@ -14,62 +109,31 @@
     </div>
 
     <div class="buttons">
-      <div
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          width: 80%;
-        "
-      >
+      <div class="button-container">
         <div class="left_section">
-          <button type="button" class="btn_good" onclick="setLike();">
+          <button type="button" class="btn_good" @click="setLike">
             <span class="mdi mdi-heart-outline" style="font-size: 24px"></span>
             <span class="num" id="conLike">0</span>
           </button>
-          <span class="num_view"
-            ><em class="tit"
-              ><span
-                class="mdi mdi-eye-outline"
-                style="font-size: 24px"
-              ></span></em
-            ><span class="num" id="conRead">904</span></span
-          >
+          <span class="num_view">
+            <em class="tit">
+              <span class="mdi mdi-eye-outline" style="font-size: 24px"></span>
+            </em>
+            <span class="num" id="conRead">{{ travelPlan.views }}</span>
+          </span>
         </div>
         <div class="right_section">
-          <button
-            type="button"
-            class="btn_bookmark"
-            onclick="setFavoContentDetail();"
-          >
-            <span
-              class="mdi mdi-bookmark-outline"
-              style="font-size: 24px"
-            ></span>
+          <button type="button" class="btn_bookmark" @click="setFavoContentDetail">
+            <span class="mdi mdi-bookmark-outline" style="font-size: 24px"></span>
           </button>
-          <button
-            type="button"
-            class="btn_print"
-            onclick="openPrint();"
-            title="새창 열림"
-          >
-            <span
-              class="mdi mdi-printer-outline"
-              style="font-size: 24px"
-            ></span>
+          <button type="button" class="btn_print" @click="openPrint" title="새창 열림">
+            <span class="mdi mdi-printer-outline" style="font-size: 24px"></span>
           </button>
-          <button
-            type="button"
-            class="btn_cos"
-            onclick="myCourseCartDetail('C','12','');"
-          >
+          <button type="button" class="btn_cos" @click="myCourseCartDetail('C', '12', '')">
             <span class="mdi mdi-map" style="font-size: 24px"></span>
           </button>
-          <button type="button" class="btn_sharing" onclick="openShare();">
-            <span
-              class="mdi mdi-share-variant-outline"
-              style="font-size: 24px"
-            ></span>
+          <button type="button" class="btn_sharing" @click="openShare">
+            <span class="mdi mdi-share-variant-outline" style="font-size: 24px"></span>
           </button>
         </div>
       </div>
@@ -98,25 +162,29 @@
 
     <div class="body-content">
       <div class="timeline">
-        <v-stepper
-          alt-labels
-          v-for="(space, spaceIndex) in spaces"
-          :key="spaceIndex"
-        >
+        <v-stepper alt-labels>
           <v-stepper-header>
-            <v-stepper-item>{{ space.title }}</v-stepper-item>
-            <v-stepper-item
-              v-for="(item, itemIndex) in space.items"
-              :key="itemIndex"
-              :title="item.name"
-              :value="itemIndex + 1"
-            >
+            <v-stepper-item v-for="(space, spaceIndex) in spaces" :key="spaceIndex">
+              {{ space.title }}
             </v-stepper-item>
           </v-stepper-header>
-          <div class="text-center mb-4" style="margin-top: 15px">
-            <div class="content-des">{{ space.content }}</div>
+          <div v-for="(space, spaceIndex) in spaces" :key="spaceIndex">
+            <v-stepper-content :step="spaceIndex + 1">
+              <v-card>
+                <v-card-text>
+                  <div v-for="(item, itemIndex) in space.items" :key="itemIndex">
+                    {{ item.name }}
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-stepper-content>
           </div>
         </v-stepper>
+        <div class="text-center mb-4" style="margin-top: 15px">
+          <div class="content-des" v-for="(space, spaceIndex) in spaces" :key="spaceIndex">
+            {{ space.content }}
+          </div>
+        </div>
       </div>
     </div>
     <v-row>
@@ -125,90 +193,6 @@
     </v-row>
   </div>
 </template>
-
-<script>
-export default {
-  data() {
-    return {
-      spaces: [
-        {
-          title: "1일차",
-          items: [
-            { name: "강남역" },
-            { name: "멀티캠퍼스" },
-            { name: "대림역" },
-          ],
-          content: "강남역 갔다가 멀캠에서 교육 듣고 대림역으로 집에 가자,,",
-        },
-        {
-          title: "2일차",
-          items: [{ name: "역삼역" }, { name: "노브랜드버거" }],
-          content: "역삼역에서 돌아다니다가 노브랜드버거 먹으면 됌",
-        },
-      ],
-      travelPlan: {
-        title: "강남 나들이",
-        startDate: "2024-05-19",
-        endDate: "2024-05-20",
-        nickname: "우히히",
-        theme: "SSAFY",
-      },
-    };
-  },
-};
-</script>
-
-<script setup>
-import { ref } from "vue";
-import {
-  KakaoMap,
-  KakaoMapMarkerPolyline,
-  KakaoMapMarker,
-  KakaoMapCustomOverlay,
-} from "vue3-kakao-maps";
-
-/**
- * 해당 장소에 대한 세부 내용 Server로부터 받는다.
- * 받은 정보를 토대로 마커 띄우고 인포윈도우 띄운다.
- * 사이드바의 추가 버튼으로 여행 계획에 해당 장소를 추가할 수 있다.
- */
-const image = {
-  imageSrc: "src/assets/images/marker/15.png",
-  imageWidth: 30,
-  imageHeight: 40,
-};
-
-const newImage = {
-  imageSrc: "src/assets/images/marker/12.png",
-  imageWidth: 30,
-  imageHeight: 40,
-};
-
-const markerList = ref([
-  { lat: 33.4509, lng: 126.571, image, order: "출발" },
-  { lat: 33.451, lng: 126.572, image },
-  { lat: 33.452, lng: 126.573, image },
-  { lat: 33.4518, lng: 126.5725, image },
-]);
-
-// 마커 추가하기 버튼의 함수입니다
-const addMarker = () => {
-  markerList.value.push({
-    lat: 33.4509 + Math.random() * 0.003,
-    lng: 126.571 + Math.random() * 0.003,
-    image,
-  });
-};
-// 마커 삭제하기 버튼의 함수입니다
-const deleteMarker = () => {
-  markerList.value.pop();
-};
-
-// Define the onClickKakaoMapMarker method
-const onClickKakaoMapMarker = () => {
-  alert("Marker clicked!");
-};
-</script>
 
 <style>
 @font-face {
@@ -248,6 +232,13 @@ const onClickKakaoMapMarker = () => {
 
 .buttons {
   margin-left: 300px;
+}
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
 }
 
 .right_section {
