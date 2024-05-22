@@ -175,12 +175,15 @@
         >
           <div class="card-details">
             <img
-              v-if="
-                selectedCard.images != null && selectedCard.images.length > 0
-              "
-              :src="selectedCard.images[0]"
+              v-if="selectedCard.imgUrl"
+              :src="selectedCard.imgUrl"
               alt="Spot Image"
-              style="max-width: 100%; height: auto"
+              style="
+                width: 80%;
+                max-width: 600px;
+                height: 70%;
+                margin-left: 15px;
+              "
             />
             <img
               v-else
@@ -191,9 +194,11 @@
             />
             <div class="card-info-custom">
               <h2 class="card-info-title">
-                <a :href="selectedCard.spot.homepage" target="_blank">{{
-                  selectedCard.spot.name
-                }}</a>
+                <a
+                  href="#"
+                  @click.prevent="handleClick(selectedCard.spot.id)"
+                  >{{ selectedCard.spot.name }}</a
+                >
               </h2>
               <p><strong>주소:</strong> {{ selectedCard.spot.address }}</p>
               <p><strong>조회수:</strong> {{ selectedCard.spot.views }}</p>
@@ -219,7 +224,7 @@
             class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
             :class="{ active: selectedCard === index }"
             @click="handleCardClick(card)"
-            style="height: 7rem"
+            style="height: 7rem; width: 100%"
           >
             <!-- 이미지를 왼쪽에 위치시키고 카드 바디를 오른쪽에 배치합니다. -->
             <div
@@ -229,14 +234,18 @@
             >
               <div class="col-4">
                 <!-- 조건부 렌더링 -->
-                <template
-                  v-if="card.spot.images && card.spot.images.length > 0"
-                >
+                <template v-if="card.imgUrl">
                   <img
-                    :src="card.spot.images[0].imgSrc"
+                    :src="card.imgUrl"
                     class="card-img-top"
                     alt="..."
-                    style="width: 100%; height: 100%; margin-left: 15px"
+                    style="
+                      width: 130px;
+                      max-width: 100%;
+                      height: 70px;
+                      max-height: 100%;
+                      margin-left: 15px;
+                    "
                   />
                 </template>
                 <template v-else>
@@ -244,7 +253,13 @@
                     src="@/assets/images/noimg.png"
                     class="card-img-top"
                     alt="No Image"
-                    style="width: 100%; height: 100%; margin-left: 15px"
+                    style="
+                      width: 80px;
+                      max-width: 100%;
+                      height: auto;
+                      max-height: 100%;
+                      margin-left: 15px;
+                    "
                   />
                 </template>
                 <!-- /조건부 렌더링 -->
@@ -265,9 +280,12 @@
             :key="index"
             v-slot="{ selectedClass, toggle }"
           >
-            <v-chip :class="selectedClass" @click="toggle">{{
-              category
-            }}</v-chip>
+            <v-chip
+              :class="selectedClass"
+              @click="() => handleCategoryClick(category.id, toggle)"
+            >
+              {{ category.name }}
+            </v-chip>
           </v-item>
         </v-item-group>
       </div>
@@ -349,6 +367,7 @@ import { useSearchStore } from "@/stores/searchStore.js";
 const searchStore = useSearchStore();
 
 const selectedCategory = ref(null);
+const selectedCategoryContentId = ref(null);
 const searchText = ref(null);
 const selectedAreaCode = ref(null);
 const selectedGugunCode = ref(null);
@@ -378,18 +397,26 @@ const searchResults = ref([]);
 provide("searchResults", searchResults); // Provide searchResults to children
 
 const categories = ref([
-  "🌄 관광지",
-  "📖 문화시설",
-  "👨‍👩‍👧‍👦 행사",
-  "🏀 레포츠",
-  "👜 쇼핑",
-  "🍴 음식점",
+  { name: "🌄 관광지", id: 12 },
+  { name: "📖 문화시설", id: 14 },
+  { name: "👨‍👩‍👧‍👦 행사", id: 15 },
+  { name: "🏀 레포츠", id: 28 },
+  { name: "👜 쇼핑", id: 38 },
+  { name: "🍴 음식점", id: 39 },
 ]);
 const cards = ref([]);
 
 onMounted(() => {
   fetchAreaCodes();
 });
+
+const handleCategoryClick = (category, toggle) => {
+  console.log("cid " + category);
+  selectedCategory.value = category;
+  selectedCategoryContentId.value = category;
+  console.log(selectedCategory.value);
+  toggle();
+};
 
 const handleCardClick = async (card) => {
   selectedCard.value = card;
@@ -408,7 +435,7 @@ const handleCardClick = async (card) => {
 
 const fetchAreaCodes = async () => {
   try {
-    const response = await axios.get("http://localhost/api/spots/areacode");
+    const response = await axios.get("http://localhost/api/spots/search/areacode");
     areas.value = response.data.data;
   } catch (error) {
     console.error("Error fetching area codes:", error);
@@ -418,7 +445,7 @@ const fetchAreaCodes = async () => {
 const fetchGugunCodes = async () => {
   try {
     const response = await axios.get(
-      `http://localhost/api/spots/gungucode?areaCode=${selectedAreaCode.value}`
+      `http://localhost/api/spots/search/gungucode?areaCode=${selectedAreaCode.value}`
     );
     guguns.value = response.data.data;
   } catch (error) {
@@ -442,21 +469,27 @@ const localSearch = () => {
 
 const fetchSearchResults = async () => {
   try {
-    const url = `http://localhost/api/spots/title/${encodeURIComponent(
-      searchText.value
-    )}/region?areaCode=${selectedAreaCode.value}&gunguCode=${
-      selectedGugunCode.value
-    }&offset=0&limit=15`;
-    const response = await axios.get(url);
-    console.log(url);
-    const data = response.data.data;
+    const url = `http://localhost/api/spots/search`;
+    const params = {
+      areaCode: selectedAreaCode.value,
+      gunguCode: selectedGugunCode.value,
+      title: searchText.value,
+      contentTypeId: selectedCategoryContentId.value,
+      offset: 0,
+      limit: 15,
+    };
 
+    console.log("params :" + selectedCategory.value);
+    console.log(params);
+    const response = await axios.get(url, { params });
+    console.log(url, params);
+    const data = response.data.data;
+    searchStore.setSearchResults(data);
     console.log(data);
     // cards 값 설정
     cards.value = data;
     console.log(cards.value);
     // searchResults 값 설정
-    searchStore.setSearchResults(data);
   } catch (error) {
     console.error("Error searching:", error);
   }
@@ -466,6 +499,20 @@ const handleButtonSelect = (index) => {
   selectedButton.value = index;
   if (index === 3) {
     router.push("/makePlan"); // 나의여행 페이지로 이동
+  }
+  cards.value = [];
+};
+
+const handleClick = async (spotId) => {
+  try {
+    // API 요청
+    const response = await axios.get(`http://localhost/api/spots/search/${spotId}`);
+    console.log('API 응답:', response.data);
+
+    // /spotDetail 페이지로 이동
+    router.push({ name: 'spotDetail', params: { id: spotId } });
+  } catch (error) {
+    console.error('API 요청 중 오류 발생:', error);
   }
 };
 </script>
@@ -489,7 +536,9 @@ const handleButtonSelect = (index) => {
   background-color: transparent;
   padding: 0px;
   width: 24%;
+  height: 700px;
   font-family: "GongGothicMedium";
+  overflow-y: auto;
 }
 
 .btn-secondary {

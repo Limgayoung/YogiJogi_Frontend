@@ -441,7 +441,7 @@ const fetchSearchResults = async () => {
 
 const fetchAreaCodes = async () => {
   try {
-    const response = await axios.get("http://localhost/api/spots/areacode");
+    const response = await axios.get("http://localhost/api/spots/search/areacode");
     areas.value = response.data.data;
     console.log("Area codes fetched:", areas.value);
   } catch (error) {
@@ -452,7 +452,7 @@ const fetchAreaCodes = async () => {
 const fetchGugunCodes = async () => {
   try {
     const response = await axios.get(
-      `http://localhost/api/spots/gungucode?areaCode=${selectedAreaCode.value}`
+      `http://localhost/api/spots/search/gungucode?areaCode=${selectedAreaCode.value}`
     );
     guguns.value = response.data.data;
     console.log("Gugun codes fetched:", guguns.value);
