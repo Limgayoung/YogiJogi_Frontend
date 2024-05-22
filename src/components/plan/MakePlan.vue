@@ -130,6 +130,14 @@
           :lat="mapCenter.lat"
           :lng="mapCenter.lng"
         >
+          <KakaoMapMarkerPolyline
+            :markerList="markerList"
+            :showMarkerOrder="true"
+            strokeColor="#C74C5E"
+            :strokeOpacity="1"
+            strokeStyle="solid"
+            v-if="markerList.length > 0"
+          />
           <KakaoMapMarker
             :lat="currentMarker.lat"
             :lng="currentMarker.lng"
@@ -147,7 +155,7 @@
               <div style="font-size: 13px">{{ infoWindow.address }}</div>
               <!-- <span style="float: right; cursor: pointer" @click="closeOverlay" title="닫기">X</span> -->
               <button
-                @click="addMarkerToItinerary"
+                @click="addItemToLastSpace"
                 style="
                   font-size: 13px;
                   background-color: #ffc700;
@@ -199,6 +207,7 @@
             group="meals"
             class="draggable-list"
             :itemKey="(item) => item.name"
+            @end="onDragEnd"
           >
             <template #item="{ element: meal, index: mealIndex }">
               <li
@@ -267,18 +276,14 @@ onMounted(() => {
 
 const selectedAreaCode = ref(null);
 const selectedGugunCode = ref(null);
-const searchResult = ref(null);
 const cards = ref([]);
 const areas = ref([]);
 const guguns = ref([]);
-const selectedAreaName = ref("");
-const selectedGugunName = ref("");
-const selectedValue1 = ref(null);
-const selectedValue2 = ref(null);
+const markerList = ref([
+]);
+
 const searchText = ref("");
 const selectedCard = ref(null);
-const selectedCardDescription = ref("");
-const visibleRight = ref(false);
 const categories = ref([
   "🌄 관광지",
   "📖 문화시설",
@@ -287,6 +292,10 @@ const categories = ref([
   "👜 쇼핑",
   "🍴 음식점",
 ]);
+
+watch(markerList, (newVal) => {
+  console.log("Marker list updated:", newVal);
+});
 
 const mapCenter = ref({ lat: 37.5665, lng: 126.978 }); // 서울의 위도와 경도
 const currentMarker = ref({
@@ -307,6 +316,42 @@ const infoWindow = ref({
 const visible = ref(false);
 const onClickKakaoMapMarker = () => {
   visible.value = !visible.value;
+};
+
+const addMarkerToList = (lat, lng) => {
+  console.log("add: " + lat, lng);
+  const tmpMarker = {
+    lat: lat,
+    lng: lng,
+  };
+  markerList.value.push(tmpMarker);
+  console.log("Marker list updated:", markerList.value); // 변경된 markerList 콘솔에 출력
+};
+
+const addItemToLastSpace = () => {
+  const lastSpace = spaces.value[spaces.value.length - 1];
+  if (lastSpace) {
+    const newMarker = {
+      name: currentMarker.value.title,
+      id: currentMarker.value.id,
+      lat: currentMarker.value.lat,
+      lng: currentMarker.value.lng,
+    };
+    console.log("함수 호출");
+    lastSpace.items.push(newMarker);
+    addMarkerToList(currentMarker.value.lat, currentMarker.value.lng); // 새로운 마커 추가
+  }
+};
+
+const updateMarkerListOrder = () => {
+  markerList.value = spaces.value.flatMap((space) =>
+    space.items.map((item) => ({ lat: item.lat, lng: item.lng }))
+  );
+};
+
+// 드래그로 요소 순서 변경 시 호출되는 함수
+const onDragEnd = () => {
+  updateMarkerListOrder(); // 마커 리스트 순서 업데이트
 };
 
 const tabs = ref([{ value: "tab1", text: "1일차", inputText: "" }]);
@@ -346,18 +391,26 @@ const removeTab = () => {
 const removeItem = (spaceIndex, mealIndex) => {
   const space = spaces.value[spaceIndex];
   if (space && space.items) {
-    space.items.splice(mealIndex, 1);
+    const removedItem = space.items.splice(mealIndex, 1)[0];
+
+    // markerList에서 해당 마커를 삭제
+    markerList.value = markerList.value.filter(
+      (marker) => !(marker.lat === removedItem.lat && marker.lng === removedItem.lng)
+    );
+
+    // 카카오맵에 실시간으로 반영
+    updateMarkerListOrder();
   }
 };
 
-const addItemToLastSpace = () => {
-  const lastSpace = spaces.value[spaces.value.length - 1];
-  if (lastSpace) {
-    lastSpace.items.push({
-      name: `새로운 여행지${lastSpace.items.length + 1}`,
-    });
-  }
-};
+// const addItemToLastSpace = () => {
+//   const lastSpace = spaces.value[spaces.value.length - 1];
+//   if (lastSpace) {
+//     lastSpace.items.push({
+//       name: `새로운 여행지${lastSpace.items.length + 1}`,
+//     });
+//   }
+// };
 
 const fetchSearchResults = async () => {
   try {
@@ -441,15 +494,15 @@ const handleCardClick = (card) => {
 //   }
 // };
 
-const addMarkerToItinerary = () => {
-  const lastSpace = spaces.value[spaces.value.length - 1];
-  if (lastSpace) {
-    lastSpace.items.push({
-      name: currentMarker.value.title,
-      id: currentMarker.value.id,
-    });
-  }
-};
+// const addMarkerToItinerary = () => {
+//   const lastSpace = spaces.value[spaces.value.length - 1];
+//   if (lastSpace) {
+//     lastSpace.items.push({
+//       name: currentMarker.value.title,
+//       id: currentMarker.value.id,
+//     });
+//   }
+// };
 
 const spacesWatcher = watch(
   spaces,
