@@ -19,7 +19,7 @@
   </div>
   <div class="sidebar2">
     <!-- 추천테마 -->
-    <div v-if="selectedButton === 0">
+    <div v-if="selectedButton === 1">
       <div class="where-go">해시태그로 검색해보세요!</div>
       <div class="container-side mt-3">
         <div class="d-flex">
@@ -32,7 +32,7 @@
             rounded="xl"
           >
             <div class="4pa-">
-              <v-responsive class="overflow-y-auto" max-height="150">
+              <v-responsive class="overflow-y-auto" max-height="150" style="margin-left: 15px;">
                 <v-chip-group class="mt-3" selected-class="text-color" column>
                   <v-chip
                     v-for="tag in hashtags.data"
@@ -81,6 +81,7 @@
               <h2 class="card-info-title">
                 <a
                   href="#"
+                  style="color: black;"
                   @click.prevent="handleClick(selectedCard.spot.id)"
                   >{{ selectedCard.spot.name }}</a
                 >
@@ -161,7 +162,7 @@
     </div>
 
     <!-- 인기장소 -->
-    <div v-else-if="selectedButton === 1">
+    <div v-else-if="selectedButton === 0">
       <div class="where-go">어디로 떠나볼까요?</div>
       <div v-if="searchResult" class="search-result">
         {{ selectedAreaName }} {{ selectedGugunName }}
@@ -254,6 +255,7 @@
               <h2 class="card-info-title">
                 <a
                   href="#"
+                  style="color: black;"
                   @click.prevent="handleClick(selectedCard.spot.id)"
                   >{{ selectedCard.spot.name }}</a
                 >
@@ -398,14 +400,24 @@
               <h2 class="card-info-title">
                 <a
                   href="#"
+                  style="color: black;"
                   @click.prevent="handleClickCourseCard(selectedCard.id)"
                   >{{ selectedCard.title }}</a
                 >
               </h2>
               <!-- <p><strong>테마:</strong> {{ selectedCard.spot.address }}</p> -->
-              <p><strong>여행기간:</strong> {{ selectedCard.tripPeriod }}</p>
               <p><strong>조회수:</strong> {{ selectedCard.views }}</p>
-<p>{{ spaces.values }}</p>
+              <hr>
+              <h4>총 여행 일정: {{ selectedCard.tripPeriod }}일</h4>
+              <div v-for="(day, index) in spaces" :key="index">
+                <h4>{{ day.title }}</h4>
+                <ul>
+                  <li v-for="(item, itemIndex) in day.items" :key="itemIndex">
+                    <p> 이름 : {{ item.name }}</p>
+                    <p> 주소 : {{ item.address }}</p>
+                  </li>
+                </ul>
+              </div>
               <!-- <p v-if="selectedCard.spot.homepage">
                 <strong>홈페이지:</strong>
                 <a :href="selectedCard.spot.homepage" target="_blank">{{
@@ -504,8 +516,8 @@ const areas = ref([]);
 const guguns = ref([]);
 const selectedAreaName = ref("");
 const selectedGugunName = ref("");
-const buttons = ref(["추천테마", "인기장소", "여행코스", "나의여행"]);
-const selectedButton = ref(1);
+const buttons = ref(["장소검색", "해시태그", "코스추천", "나의여행"]);
+const selectedButton = ref(0);
 const selectedCard = ref(null);
 const selectedCardDescription = ref("");
 const visibleRight = ref(false);
@@ -585,27 +597,30 @@ const handleCourseCardClick = async (card) => {
     const groupedSchedules = data.schedules.reduce((acc, schedule) => {
       const { dateSequence } = schedule;
       if (!acc[dateSequence]) {
-        acc[dateSequence] = { items: [], content: data.content[dateSequence - 1] };
+        acc[dateSequence] = {
+          items: [],
+          content: data.content[dateSequence - 1],
+        };
       }
       acc[dateSequence].items.push(schedule);
       return acc;
     }, {});
 
     // 그룹화된 데이터를 배열로 변환 및 scheduleSequence 순서대로 정렬
-    spaces.value = Object.keys(groupedSchedules).map(dateSequence => {
+    spaces.value = Object.keys(groupedSchedules).map((dateSequence) => {
       return {
         title: `Day ${dateSequence}`,
         items: groupedSchedules[dateSequence].items
           .sort((a, b) => a.scheduleSequence - b.scheduleSequence)
-          .map(schedule => ({
+          .map((schedule) => ({
             name: schedule.spotInfo.spot.name,
             address: schedule.spotInfo.spot.address,
-            imgUrl: schedule.spotInfo.spot.imgUrl // imgUrl을 spotInfo.spot에서 가져옴
+            imgUrl: schedule.spotInfo.spot.imgUrl, // imgUrl을 spotInfo.spot에서 가져옴
           })),
-        content: groupedSchedules[dateSequence].content
+        content: groupedSchedules[dateSequence].content,
       };
     });
-
+    console.log("space: ", spaces.value);
     // 결과 확인
     console.log(allSpotInfo);
     // markerList.value = data.map(trip => trip.schedules.map(schedule => schedule.spotInfo));
@@ -730,7 +745,7 @@ const handleClickCourseCard = async (spotId) => {
     console.log("API 응답:", response.data);
 
     // /spotDetail 페이지로 이동
-    router.push({ name: "spotDetail", params: { id: spotId } });
+    router.push({ name: "planDetail", params: { id: spotId } });
   } catch (error) {
     console.error("API 요청 중 오류 발생:", error);
   }
