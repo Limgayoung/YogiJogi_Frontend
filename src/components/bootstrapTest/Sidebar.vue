@@ -273,6 +273,12 @@
                 <strong>전화번호:</strong> {{ selectedCard.spot.phone }}
               </p>
               <p v-else><strong>전화번호:</strong> 등록된 정보가 없습니다.</p>
+              <a
+                  href="#"
+                  style="color: #ffb108;"
+                  @click.prevent="goWriteReview(selectedCard.spot.id)"
+                  >후기 작성하러 가기</a
+                >
             </div>
           </div>
         </Sidebar>
@@ -499,11 +505,13 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { provide } from "vue";
-const router = useRouter();
 import axios from "axios";
 import Sidebar from "primevue/sidebar";
 import { useSearchStore } from "@/stores/searchStore.js";
+import { useUserStore } from "@/stores/userStore";
 
+const router = useRouter();
+const userStore = useUserStore();
 const searchStore = useSearchStore();
 
 const selectedCategory = ref(null);
@@ -733,6 +741,17 @@ const handleClick = async (spotId) => {
     router.push({ name: "spotDetail", params: { id: spotId } });
   } catch (error) {
     console.error("API 요청 중 오류 발생:", error);
+  }
+};
+
+const goWriteReview = (spotId) => {
+  if (userStore.isAuthenticated) {
+    router.push({ 
+      name: "makeSpotReview", 
+      params: { id: spotId } 
+    });
+  } else {
+    router.push("/login");
   }
 };
 
