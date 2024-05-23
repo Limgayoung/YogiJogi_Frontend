@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRoute } from "vue-router";
 import {
@@ -20,11 +20,24 @@ const travelPlan = ref({
 
 const spaces = ref([]);
 const markerList = ref([]);
-// const kakaoMarkerList = ref([]);
+const themes = ref([
+  { name: "가족과 함께", id: 1 },
+  { name: "연인과 함께", id: 2 },
+  { name: "아기와 함께", id: 3 },
+  { name: "반려동물과 함께", id: 4 },
+  { name: "친구와 함께", id: 5 },
+  { name: "나홀로 여행", id: 6 },
+  { name: "어르신과 함께", id: 7 },
+]);
+
+const findThemeNameById = (id) => {
+  const themeName = themes.value.find(t => t.id === id);
+  return themeName ? themeName.name : null;
+};
+
 const map = ref(null);
 let bounds = null;
 const loading = ref(true); // 로딩 상태 변수
-const mapCenter = ref({ lat: 37.5665, lng: 126.978 }); // 서울의 위도와 경도
 
 const image = {
   imageSrc: "src/assets/images/marker/15.png",
@@ -37,40 +50,6 @@ const newImage = {
   imageWidth: 30,
   imageHeight: 40,
 };
-// const onLoadKakaoMap = (mapRef) => {
-//   map.value = mapRef;
-//   bounds = new kakao.maps.LatLngBounds();
-//   setMarkers(searchResults.value);
-// };
-
-// const setMarkers = (results) => {
-//   if (!results || results.length === 0) {
-//     clearMarkers(); // 기존 마커 제거
-//     return;
-//   }
-
-//   if (map.value && bounds) {
-//     clearMarkers(); // 기존 마커 제거
-//     bounds = new kakao.maps.LatLngBounds();
-
-//     results.forEach((result) => {
-//       const point = new kakao.maps.LatLng(result.spot.latitude, result.spot.longitude);
-//       const marker = new kakao.maps.Marker({
-//         position: point,
-//       });
-//       marker.setMap(map.value);
-//       markers.value.push(marker); // 새로운 마커 저장
-//       bounds.extend(point);
-//     });
-
-//     map.value.setBounds(bounds);
-//   }
-// };
-
-
-// watch(kakaoMarkerList, (newVal) => {
-//   console.log("kakao Marker list updated:", newVal);
-// });
 
 const onLoadKakaoMap = (mapRef) => {
   map.value = mapRef;
@@ -100,17 +79,15 @@ const setMarkers = (results) => {
 
 const fetchPlanDetails = async () => {
   const id = route.params.id;
-  // console.log("params으로 받은 id: ", id);
   try {
     const response = await axios.get(`http://localhost/api/trips/search/${id}`);
-    console.log("response: ", response);
     const data = response.data.data;
     travelPlan.value = {
       title: data.title,
       startDate: data.createdAt,
       endDate: data.updatedAt,
       nickname: data.userName,
-      theme: data.tripThemeId,
+      theme: findThemeNameById(data.tripThemeId), // 테마 이름 찾기
       views: data.views,
     };
 
@@ -139,15 +116,11 @@ const fetchPlanDetails = async () => {
       };
     });
 
-    // console.log(spaces.value);
-
     markerList.value = data.schedules.map(schedule => ({
       key: schedule.index,
       lat: schedule.spotInfo.spot.latitude,
       lng: schedule.spotInfo.spot.longitude,
-      // order: schedule.scheduleSequence.toString(),
     })).filter(marker => marker.lat && marker.lng); // 필터링 추가
-    // console.log('markerList: ', markerList.value);
 
     setMarkers(markerList.value); // 여기서 마커 설정 -> 맵 bound 설정
   } catch (error) {
@@ -155,13 +128,10 @@ const fetchPlanDetails = async () => {
   } finally {
     loading.value = false;
   }
-
 };
 
 onMounted(async () => { 
-  // console.log('loading 전: ', loading.value); 
   await fetchPlanDetails();
-  // console.log('loading 후: ', loading.value);
 });
 
 const setLike = () => {
@@ -199,7 +169,7 @@ const onClickKakaoMapMarker = () => {
       <div class="text-center mb-4">
         <div class="travel-info">
           <div class="travel-date">
-            여행 일정: {{ travelPlan.startDate }} ~ {{ travelPlan.endDate }}
+            작성 일시: {{ travelPlan.startDate }} - 수정 일시: {{ travelPlan.endDate }}
           </div>
           <div class="travel-theme">테마: {{ travelPlan.theme }}</div>
           <div class="nickname">닉네임: {{ travelPlan.nickname }}</div>
@@ -240,10 +210,8 @@ const onClickKakaoMapMarker = () => {
       <hr />
 
       <div class="kakao-map-wrapper-detail">
-        <!-- <KakaoMap width="80%" height="25rem" :lat="37.5099674377" :lng="127.0377755568"> -->
         <KakaoMap width="80%" height="25rem" :lat="33.452" :lng="126.573" @onLoadKakaoMap="onLoadKakaoMap">
-            <KakaoMapMarkerPolyline :markerList="markerList" :showMarkerOrder="true" strokeColor="#C74C5E"
-            :strokeOpacity="1" strokeStyle="solid" />
+          <KakaoMapMarkerPolyline :markerList="markerList" :showMarkerOrder="true" strokeColor="#C74C5E" :strokeOpacity="1" strokeStyle="solid" />
         </KakaoMap>
       </div>
 
@@ -252,8 +220,7 @@ const onClickKakaoMapMarker = () => {
           <v-stepper alt-labels v-for="(space, spaceIndex) in spaces" :key="spaceIndex">
             <v-stepper-header>
               <v-stepper-item>{{ space.title }}</v-stepper-item>
-              <v-stepper-item v-for="(item, itemIndex) in space.items" :key="itemIndex" :title="item.name"
-                :value="itemIndex + 1">
+              <v-stepper-item v-for="(item, itemIndex) in space.items" :key="itemIndex" :title="item.name" :value="itemIndex + 1">
                 <div class="stepper-title">{{ item.address }}</div>
                 <div class="stepper-image"><img :src="item.imgUrl" alt=""></div>
               </v-stepper-item>
