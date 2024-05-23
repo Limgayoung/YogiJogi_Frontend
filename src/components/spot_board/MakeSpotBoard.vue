@@ -75,17 +75,18 @@
   const addHashtag = () => {
     if (hashtagInput.value) {
       const words = hashtagInput.value.split(" ");
-      const hashtags = words.map(word => {
-        if (word.trim() !== "") {
-          return word.trim().charAt(0).toLowerCase();
-        }
+      console.log('words: ',words);
+      const hashtags_fromWords = words.map(word => {
+        return word.substring(1);
       });
-      const validHashtags = hashtags.filter(tag => tag !== undefined);
+      console.log('hashtags filter 전: ',hashtags_fromWords);
+      const validHashtags = hashtags_fromWords.filter(tag => tag !== undefined);
       validHashtags.forEach(tag => {
         if (!form.value.hashtags.includes(tag)) {
           form.value.hashtags.push(tag);
         }
       });
+      console.log(hashtags_fromWords);
       hashtagInput.value = "";
     }
   };
