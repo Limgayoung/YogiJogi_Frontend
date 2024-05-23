@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import TheMainView from "@/views/TheMainView.vue";
+import PlanDetail from "@/components/plan/PlanDetail.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -52,9 +53,10 @@ const router = createRouter({
       component: () => import("@/components/plan/MakePlan.vue")
     },
     {
-      path: "/planDetail",
+      path: "/planDetail/:id",
       name:"planDetail",
-      component: () => import("@/components/plan/PlanDetail.vue")
+      component: PlanDetail
+      // component: () => import("@/components/plan/PlanDetail.vue")
     }
     ,
     {

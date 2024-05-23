@@ -1,93 +1,44 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 
 const router = useRouter();
 const userStore = useUserStore();
 
-const cards = ref([
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "물의 정원",
-    description: "경기도 남양주시 조안면 북한강로 398",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "문래창작촌",
-    description: "서울특별시 영등포구 문래동3가 54-37",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "경복궁",
-    description: "서울특별자치구 종로구 사직로 161",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "섭지코지",
-    description: "제주특별자치구 서귀포시 성산읍 섭지코지로",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "물의 정원",
-    description: "경기도 남양주시 조안면 북한강로 398",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "문래창작촌",
-    description: "서울특별자치구 영등포구 문래동3가 54-37",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "경복궁",
-    description: "서울특별자치구 종로구 사직로 161",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "섭지코지",
-    description: "제주특별자치구 서귀포시 성산읍 섭지코지로",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "물의 정원",
-    description: "경기도 남양주시 조안면 북한강로 398",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "문래창작촌",
-    description: "서울특별자치구 영등포구 문래동3가 54-37",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "경복궁",
-    description: "서울특별자치구 종로구 사직로 161",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "섭지코지",
-    description: "제주특별자치구 서귀포시 성산읍 섭지코지로",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "물의 정원",
-    description: "경기도 남양주시 조안면 북한강로 398",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "문래창작촌",
-    description: "서울특별자치구 영등포구 문래동3가 54-37",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "경복궁",
-    description: "서울특별자치구 종로구 사직로 161",
-  },
-  {
-    imageUrl: "https://cdn.vuetifyjs.com/images/cards/forest-art.jpg",
-    name: "섭지코지",
-    description: "제주특별자치구 서귀포시 성산읍 섭지코지로",
-  },
-]);
+const cards = ref([]);
+const defaultImage = 'src/assets/images/noimg.png'; // 기본 이미지 경로
+
+const fetchTrips = async (limit = 12, offset = 0) => {
+  try {
+    const response = await axios.get('http://localhost/api/trips/search', {
+      params: {
+        limit,
+        offset
+      }
+    });
+    console.log("response.data.data: ", response.data.data);
+    if (response.data.data && Array.isArray(response.data.data)) {
+      cards.value = response.data.data.map(trip => ({
+        id: trip.id,
+        imageUrl: trip.imgUrl || defaultImage,
+        title: trip.title,
+        name: trip.userName,
+        description: trip.content,
+        views: trip.views,
+      }));
+      console.log("들어옴!!");
+    }
+    console.log(cards.value);
+  } catch (error) {
+    console.error("Error fetching trips:", error);
+  }
+};
+
+onMounted(() => {
+  fetchTrips();
+});
 
 const handleMakePlanClick = () => {
   if (userStore.isAuthenticated) {
@@ -99,7 +50,7 @@ const handleMakePlanClick = () => {
 </script>
 
 <template>
-  <v-row class="centered">
+  <v-row class="centered" align-content="start" justify="start">
     <v-col cols="12">
       <div
         style="
@@ -122,7 +73,7 @@ const handleMakePlanClick = () => {
     </v-col>
     <v-col
       v-for="(card, index) in cards"
-      :key="index"
+      :key="card.id"
       cols="12"
       sm="6"
       md="4"
@@ -133,19 +84,20 @@ const handleMakePlanClick = () => {
         <v-card
           class="mx-auto card-wrapper"
           max-width="300"
-          max-height="320"
+          max-height="380"
           v-bind="props"
         >
-          <v-img :src="card.imageUrl" aspect-ratio="1.3"></v-img>
+          <v-img :src="card.imageUrl" aspect-ratio="1.5" class="card-image"></v-img>
 
-          <v-card-text>
-            <h2 class="cardSpotName">{{ card.name }}</h2>
-            <p class="cardSpotDes">{{ card.description }}</p>
+          <v-card-text class="card-info">
+            <h1 class="cardSpotTitle">{{card.title}}</h1>
+            
+            <div class="cardDescriptionContainer">
+              <!-- <p class="cardSpotDes">{{ card.description }}</p>             -->
+              <p class="cardSpotViews">{{ card.name }}</p>
+              <p class="cardSpotViews">조회수 {{ card.views }}</p>
+            </div>
           </v-card-text>
-
-          <v-card-title>
-            <span class="text-primary text-subtitle-2">64 Reviews</span>
-          </v-card-title>
 
           <v-overlay
             :model-value="isHovering"
@@ -153,7 +105,7 @@ const handleMakePlanClick = () => {
             scrim="#ccc"
             contained
           >
-            <router-link to="/planDetail">
+            <router-link :to="{ name: 'planDetail', params: { id: card.id } }">
               <v-btn class="moreInfo" variant="flat">상세 정보 보러가기</v-btn>
             </router-link>
           </v-overlay>
@@ -172,6 +124,34 @@ const handleMakePlanClick = () => {
   font-style: normal;
 }
 .container-plan {
+  font-family: "GongGothicMedium";
+}
+.cardSpotTitle{
+  font-size: 17px;
+  font-family: "GongGothicMedium";
+}
+.card-wrapper {
+  max-height: 300px; /* 카드의 전체 높이를 적당히 설정 */
+}
+.card-image {
+  height: 180px; /* 이미지 높이를 줄임 */
+}
+.card-info {
+  height: 100px; /* 정보 칸의 높이를 적절히 조정 */
+}
+.cardDescriptionContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cardSpotDes {
+  margin-top: 0.5rem; /* 간격 조정 */
+  flex: 1;
+}
+.cardSpotViews {
+  margin-top: 0.5rem; /* 간격 조정 */
+  font-size: 1rem; /* 조회수 글자 크기 조정 */
+  text-align: right; /* 조회수 텍스트 오른쪽 정렬 */
   font-family: "GongGothicMedium";
 }
 </style>

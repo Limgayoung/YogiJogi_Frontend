@@ -1,177 +1,31 @@
-<template>
-  <div class="container-plan-detail">
-    <div class="text-center mb-4">
-      <div class="head-text">{{ travelPlan.title }}</div>
-    </div>
-    <div class="text-center mb-4">
-      <div class="travel-info">
-        <div class="travel-date">
-          여행 일정: {{ travelPlan.startDate }} ~ {{ travelPlan.endDate }}
-        </div>
-        <div class="travel-theme">테마: {{ travelPlan.theme }}</div>
-        <div class="nickname">닉네임: {{ travelPlan.nickname }}</div>
-      </div>
-    </div>
-
-    <div class="buttons">
-      <div
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          width: 80%;
-        "
-      >
-        <div class="left_section">
-          <button type="button" class="btn_good" onclick="setLike();">
-            <span class="mdi mdi-heart-outline" style="font-size: 24px"></span>
-            <span class="num" id="conLike">0</span>
-          </button>
-          <span class="num_view"
-            ><em class="tit"
-              ><span
-                class="mdi mdi-eye-outline"
-                style="font-size: 24px"
-              ></span></em
-            ><span class="num" id="conRead">904</span></span
-          >
-        </div>
-        <div class="right_section">
-          <button
-            type="button"
-            class="btn_bookmark"
-            onclick="setFavoContentDetail();"
-          >
-            <span
-              class="mdi mdi-bookmark-outline"
-              style="font-size: 24px"
-            ></span>
-          </button>
-          <button
-            type="button"
-            class="btn_print"
-            onclick="openPrint();"
-            title="새창 열림"
-          >
-            <span
-              class="mdi mdi-printer-outline"
-              style="font-size: 24px"
-            ></span>
-          </button>
-          <button
-            type="button"
-            class="btn_cos"
-            onclick="myCourseCartDetail('C','12','');"
-          >
-            <span class="mdi mdi-map" style="font-size: 24px"></span>
-          </button>
-          <button type="button" class="btn_sharing" onclick="openShare();">
-            <span
-              class="mdi mdi-share-variant-outline"
-              style="font-size: 24px"
-            ></span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <hr />
-    <div class="kakao-map-wrapper-detail">
-      <KakaoMap width="80%" height="25rem" :lat="33.452" :lng="126.573">
-        <KakaoMapMarkerPolyline
-          :markerList="markerList"
-          :showMarkerOrder="true"
-          strokeColor="#C74C5E"
-          :strokeOpacity="1"
-          strokeStyle="shortdot"
-        />
-
-        <KakaoMapMarker
-          :lat="33.450705"
-          :lng="126.570667"
-          :image="newImage"
-          @onClickKakaoMapMarker="onClickKakaoMapMarker"
-          :clickable="true"
-        />
-      </KakaoMap>
-    </div>
-
-    <div class="body-content">
-      <div class="timeline">
-        <v-stepper
-          alt-labels
-          v-for="(space, spaceIndex) in spaces"
-          :key="spaceIndex"
-        >
-          <v-stepper-header>
-            <v-stepper-item>{{ space.title }}</v-stepper-item>
-            <v-stepper-item
-              v-for="(item, itemIndex) in space.items"
-              :key="itemIndex"
-              :title="item.name"
-              :value="itemIndex + 1"
-            >
-            </v-stepper-item>
-          </v-stepper-header>
-          <div class="text-center mb-4" style="margin-top: 15px">
-            <div class="content-des">{{ space.content }}</div>
-          </div>
-        </v-stepper>
-      </div>
-    </div>
-    <v-row>
-      <div>🔎GPT로 여행 이동 경로 시간 알아보기</div>
-      <v-btn>click!</v-btn>
-    </v-row>
-  </div>
-</template>
-
-<script>
-export default {
-  data() {
-    return {
-      spaces: [
-        {
-          title: "1일차",
-          items: [
-            { name: "강남역" },
-            { name: "멀티캠퍼스" },
-            { name: "대림역" },
-          ],
-          content: "강남역 갔다가 멀캠에서 교육 듣고 대림역으로 집에 가자,,",
-        },
-        {
-          title: "2일차",
-          items: [{ name: "역삼역" }, { name: "노브랜드버거" }],
-          content: "역삼역에서 돌아다니다가 노브랜드버거 먹으면 됌",
-        },
-      ],
-      travelPlan: {
-        title: "강남 나들이",
-        startDate: "2024-05-19",
-        endDate: "2024-05-20",
-        nickname: "우히히",
-        theme: "SSAFY",
-      },
-    };
-  },
-};
-</script>
-
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
+import axios from "axios";
+import { useRoute } from "vue-router";
 import {
   KakaoMap,
   KakaoMapMarkerPolyline,
   KakaoMapMarker,
-  KakaoMapCustomOverlay,
 } from "vue3-kakao-maps";
 
-/**
- * 해당 장소에 대한 세부 내용 Server로부터 받는다.
- * 받은 정보를 토대로 마커 띄우고 인포윈도우 띄운다.
- * 사이드바의 추가 버튼으로 여행 계획에 해당 장소를 추가할 수 있다.
- */
+const route = useRoute();
+const travelPlan = ref({
+  title: '',
+  startDate: '',
+  endDate: '',
+  nickname: '',
+  theme: '',
+  views: 0,
+});
+
+const spaces = ref([]);
+const markerList = ref([]);
+// const kakaoMarkerList = ref([]);
+const map = ref(null);
+let bounds = null;
+const loading = ref(true); // 로딩 상태 변수
+const mapCenter = ref({ lat: 37.5665, lng: 126.978 }); // 서울의 위도와 경도
+
 const image = {
   imageSrc: "src/assets/images/marker/15.png",
   imageWidth: 30,
@@ -183,38 +37,249 @@ const newImage = {
   imageWidth: 30,
   imageHeight: 40,
 };
+// const onLoadKakaoMap = (mapRef) => {
+//   map.value = mapRef;
+//   bounds = new kakao.maps.LatLngBounds();
+//   setMarkers(searchResults.value);
+// };
 
-const markerList = ref([
-  { lat: 33.4509, lng: 126.571, image, order: "출발" },
-  { lat: 33.451, lng: 126.572, image },
-  { lat: 33.452, lng: 126.573, image },
-  { lat: 33.4518, lng: 126.5725, image },
-]);
+// const setMarkers = (results) => {
+//   if (!results || results.length === 0) {
+//     clearMarkers(); // 기존 마커 제거
+//     return;
+//   }
 
-// 마커 추가하기 버튼의 함수입니다
-const addMarker = () => {
-  markerList.value.push({
-    lat: 33.4509 + Math.random() * 0.003,
-    lng: 126.571 + Math.random() * 0.003,
-    image,
-  });
+//   if (map.value && bounds) {
+//     clearMarkers(); // 기존 마커 제거
+//     bounds = new kakao.maps.LatLngBounds();
+
+//     results.forEach((result) => {
+//       const point = new kakao.maps.LatLng(result.spot.latitude, result.spot.longitude);
+//       const marker = new kakao.maps.Marker({
+//         position: point,
+//       });
+//       marker.setMap(map.value);
+//       markers.value.push(marker); // 새로운 마커 저장
+//       bounds.extend(point);
+//     });
+
+//     map.value.setBounds(bounds);
+//   }
+// };
+
+
+// watch(kakaoMarkerList, (newVal) => {
+//   console.log("kakao Marker list updated:", newVal);
+// });
+
+const onLoadKakaoMap = (mapRef) => {
+  map.value = mapRef;
+  bounds = new kakao.maps.LatLngBounds();
+  setMarkers(markerList.value);
 };
-// 마커 삭제하기 버튼의 함수입니다
-const deleteMarker = () => {
-  markerList.value.pop();
+
+const setMarkers = (results) => {
+  if (!results || results.length === 0) {
+    return;
+  }
+  if (map.value && bounds) {
+    // 기존 마커 제거
+    map.value.markers?.forEach(marker => marker.setMap(null));
+    bounds = new kakao.maps.LatLngBounds();
+
+    results.forEach((result) => {
+      if (result.lat && result.lng) {
+        const point = new kakao.maps.LatLng(result.lat, result.lng);
+        bounds.extend(point);
+      }
+    });
+
+    map.value.setBounds(bounds);
+  }
 };
 
-// Define the onClickKakaoMapMarker method
+const fetchPlanDetails = async () => {
+  const id = route.params.id;
+  // console.log("params으로 받은 id: ", id);
+  try {
+    const response = await axios.get(`http://localhost/api/trips/search/${id}`);
+    console.log("response: ", response);
+    const data = response.data.data;
+    travelPlan.value = {
+      title: data.title,
+      startDate: data.createdAt,
+      endDate: data.updatedAt,
+      nickname: data.userName,
+      theme: data.tripThemeId,
+      views: data.views,
+    };
+
+    // dataSequence 별로 그룹화
+    const groupedSchedules = data.schedules.reduce((acc, schedule) => {
+      const { dateSequence } = schedule;
+      if (!acc[dateSequence]) {
+        acc[dateSequence] = { items: [], content: data.content[dateSequence - 1] };
+      }
+      acc[dateSequence].items.push(schedule);
+      return acc;
+    }, {});
+
+    // 그룹화된 데이터를 배열로 변환 및 scheduleSequence 순서대로 정렬
+    spaces.value = Object.keys(groupedSchedules).map(dateSequence => {
+      return {
+        title: `Day ${dateSequence}`,
+        items: groupedSchedules[dateSequence].items
+          .sort((a, b) => a.scheduleSequence - b.scheduleSequence)
+          .map(schedule => ({
+            name: schedule.spotInfo.spot.name,
+            address: schedule.spotInfo.spot.address,
+            imgUrl: schedule.spotInfo.spot.imgUrl // imgUrl을 spotInfo.spot에서 가져옴
+          })),
+        content: groupedSchedules[dateSequence].content
+      };
+    });
+
+    // console.log(spaces.value);
+
+    markerList.value = data.schedules.map(schedule => ({
+      key: schedule.index,
+      lat: schedule.spotInfo.spot.latitude,
+      lng: schedule.spotInfo.spot.longitude,
+      // order: schedule.scheduleSequence.toString(),
+    })).filter(marker => marker.lat && marker.lng); // 필터링 추가
+    // console.log('markerList: ', markerList.value);
+
+    setMarkers(markerList.value); // 여기서 마커 설정 -> 맵 bound 설정
+  } catch (error) {
+    console.error("Error fetching travel plan details:", error);
+  } finally {
+    loading.value = false;
+  }
+
+};
+
+onMounted(async () => { 
+  // console.log('loading 전: ', loading.value); 
+  await fetchPlanDetails();
+  // console.log('loading 후: ', loading.value);
+});
+
+const setLike = () => {
+  // 좋아요 버튼 클릭 처리 로직
+};
+
+const setFavoContentDetail = () => {
+  // 북마크 버튼 클릭 처리 로직
+};
+
+const openPrint = () => {
+  // 인쇄 버튼 클릭 처리 로직
+};
+
+const myCourseCartDetail = (type, id, other) => {
+  // 코스 버튼 클릭 처리 로직
+};
+
+const openShare = () => {
+  // 공유 버튼 클릭 처리 로직
+};
+
 const onClickKakaoMapMarker = () => {
   alert("Marker clicked!");
 };
 </script>
 
+<template>
+  <div class="container-plan-detail">
+    <div v-if="loading">로딩 중...</div>
+    <div v-else>
+      <div class="text-center mb-4">
+        <div class="head-text">{{ travelPlan.title }}</div>
+      </div>
+      <div class="text-center mb-4">
+        <div class="travel-info">
+          <div class="travel-date">
+            여행 일정: {{ travelPlan.startDate }} ~ {{ travelPlan.endDate }}
+          </div>
+          <div class="travel-theme">테마: {{ travelPlan.theme }}</div>
+          <div class="nickname">닉네임: {{ travelPlan.nickname }}</div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <div class="button-container">
+          <div class="left_section">
+            <button type="button" class="btn_good" @click="setLike">
+              <span class="mdi mdi-heart-outline" style="font-size: 24px"></span>
+              <span class="num" id="conLike">0</span>
+            </button>
+            <span class="num_view">
+              <em class="tit">
+                <span class="mdi mdi-eye-outline" style="font-size: 24px"></span>
+              </em>
+              <span class="num" id="conRead">{{ travelPlan.views }}</span>
+            </span>
+          </div>
+          <div class="right_section">
+            <button type="button" class="btn_bookmark" @click="setFavoContentDetail">
+              <span class="mdi mdi-bookmark-outline" style="font-size: 24px"></span>
+            </button>
+            <button type="button" class="btn_print" @click="openPrint" title="새창 열림">
+              <span class="mdi mdi-printer-outline" style="font-size: 24px"></span>
+            </button>
+            <button type="button" class="btn_cos" @click="myCourseCartDetail('C', '12', '')">
+              <span class="mdi mdi-map" style="font-size: 24px"></span>
+            </button>
+            <button type="button" class="btn_sharing" @click="openShare">
+              <span class="mdi mdi-share-variant-outline" style="font-size: 24px"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="kakao-map-wrapper-detail">
+        <!-- <KakaoMap width="80%" height="25rem" :lat="37.5099674377" :lng="127.0377755568"> -->
+        <KakaoMap width="80%" height="25rem" :lat="33.452" :lng="126.573" @onLoadKakaoMap="onLoadKakaoMap">
+            <KakaoMapMarkerPolyline :markerList="markerList" :showMarkerOrder="true" strokeColor="#C74C5E"
+            :strokeOpacity="1" strokeStyle="solid" />
+        </KakaoMap>
+      </div>
+
+      <div class="body-content">
+        <div class="timeline">
+          <v-stepper alt-labels v-for="(space, spaceIndex) in spaces" :key="spaceIndex">
+            <v-stepper-header>
+              <v-stepper-item>{{ space.title }}</v-stepper-item>
+              <v-stepper-item v-for="(item, itemIndex) in space.items" :key="itemIndex" :title="item.name"
+                :value="itemIndex + 1">
+                <div class="stepper-title">{{ item.address }}</div>
+                <div class="stepper-image"><img :src="item.imgUrl" alt=""></div>
+              </v-stepper-item>
+            </v-stepper-header>
+            <v-stepper-content>
+              <v-card>
+                <v-card-text>
+                  <div class="content-des">내용: {{ space.content }}</div>
+                </v-card-text>
+              </v-card>
+            </v-stepper-content>
+          </v-stepper>
+        </div>
+      </div>
+      <v-row>
+        <div>🔎GPT로 여행 이동 경로 시간 알아보기</div>
+        <v-btn>click!</v-btn>
+      </v-row>
+    </div>
+  </div>
+</template>
+
 <style>
 @font-face {
   font-family: "GongGothicMedium";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
-    format("woff");
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -238,6 +303,8 @@ const onClickKakaoMapMarker = () => {
 .content-des {
   margin-top: 20px;
   font-size: 20px;
+  text-align: center;
+  /* 텍스트를 가운데 정렬 */
 }
 
 .kakao-map-wrapper-detail {
@@ -248,6 +315,13 @@ const onClickKakaoMapMarker = () => {
 
 .buttons {
   margin-left: 300px;
+}
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
 }
 
 .right_section {
@@ -269,5 +343,40 @@ const onClickKakaoMapMarker = () => {
 .left_section button {
   margin-right: 10px;
   /* 각 요소 사이의 오른쪽 여백 설정 */
+}
+
+.stepper-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepper-image img {
+  width: 100px;
+  /* 이미지 가로 크기 조절 */
+  height: auto;
+  /* 이미지 세로 크기는 비율에 맞게 자동 조절 */
+  opacity: 1;
+  /* 불투명도 설정 */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+img {
+  width: 120px;
+  /* 이미지 가로 크기 조절 */
+  height: auto;
+  /* 이미지 세로 크기는 비율에 맞게 자동 조절 */
+  opacity: 1;
+  /* 불투명도 설정 */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.v-stepper {
+  margin-bottom: 40px;
+  /* 일자 간 간격 추가 */
 }
 </style>
