@@ -10,7 +10,7 @@ const userStore = useUserStore();
 const cards = ref([]);
 const defaultImage = 'src/assets/images/noimg.png'; // 기본 이미지 경로
 
-const fetchTrips = async (limit = 10, offset = 0) => {
+const fetchTrips = async (limit = 12, offset = 0) => {
   try {
     const response = await axios.get('http://localhost/api/trips/search', {
       params: {
@@ -90,10 +90,11 @@ const handleMakePlanClick = () => {
           <v-img :src="card.imageUrl" aspect-ratio="1.5" class="card-image"></v-img>
 
           <v-card-text class="card-info">
-            <h1 class="cardSpotName">{{card.title}}</h1>
-            <h2 class="cardSpotName">{{ card.name }}</h2>
+            <h1 class="cardSpotTitle">{{card.title}}</h1>
+            
             <div class="cardDescriptionContainer">
-              <p class="cardSpotDes">{{ card.description }}</p>            
+              <!-- <p class="cardSpotDes">{{ card.description }}</p>             -->
+              <p class="cardSpotViews">{{ card.name }}</p>
               <p class="cardSpotViews">조회수 {{ card.views }}</p>
             </div>
           </v-card-text>
@@ -125,6 +126,10 @@ const handleMakePlanClick = () => {
 .container-plan {
   font-family: "GongGothicMedium";
 }
+.cardSpotTitle{
+  font-size: 17px;
+  font-family: "GongGothicMedium";
+}
 .card-wrapper {
   max-height: 300px; /* 카드의 전체 높이를 적당히 설정 */
 }
@@ -132,7 +137,7 @@ const handleMakePlanClick = () => {
   height: 180px; /* 이미지 높이를 줄임 */
 }
 .card-info {
-  height: 120px; /* 정보 칸의 높이를 적절히 조정 */
+  height: 100px; /* 정보 칸의 높이를 적절히 조정 */
 }
 .cardDescriptionContainer {
   display: flex;
