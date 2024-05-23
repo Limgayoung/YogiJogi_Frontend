@@ -63,7 +63,21 @@ const router = createRouter({
       path: "/spotDetail/:id",
       name:"spotDetail",
       component: () => import("@/components/spot_detail/SpotDetail.vue")
-    }
+    },
+    {
+      path: "/spotBoard",
+      name:"spotBoard",
+      component: () => import("@/components/spot_board/SpotBoard.vue")
+    },
+    {
+      path: "/makeSpotBoard/:id",
+      name:"makeSpotBoard",
+      component: () => import("@/components/spot_board/MakeSpotBoard.vue")
+    },{
+      path: "/spotBoardDetail/:id",
+      name:"spotBoardDetail",
+      component: () => import("@/components/spot_board/SpotBoardDetail.vue")
+    },
   ],
 });
 
