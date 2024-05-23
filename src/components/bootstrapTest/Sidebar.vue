@@ -20,20 +20,33 @@
   <div class="sidebar2">
     <!-- 추천테마 -->
     <div v-if="selectedButton === 0">
-      <v-sheet class="mx-auto" max-width="400" rounded="xl">
-        <div class="pa-4">
-          <v-responsive class="overflow-y-auto" max-height="150">
-            <v-chip-group class="mt-3" selected-class="text-color" column>
-              <v-chip
-                v-for="tag in tags"
-                :key="tag"
-                :text="tag"
-                :value="tag"
-              ></v-chip>
-            </v-chip-group>
-          </v-responsive>
+      <div class="where-go">해시태그로 검색해보세요!</div>
+      <div class="container-side mt-3">
+        <div class="d-flex">
+          <div v-if="loading">로딩중</div>
+
+          <v-sheet
+            v-else="loading"
+            class="mx-auto"
+            max-width="400"
+            rounded="xl"
+          >
+            <div class="4pa-">
+              <v-responsive class="overflow-y-auto" max-height="150">
+                <v-chip-group class="mt-3" selected-class="text-color" column>
+                  <v-chip
+                    v-for="tag in hashtags.data"
+                    :key="tag.id"
+                    :text="tag.name"
+                    :value="tag.name"
+                    @click="handleChipClick(tag.id)"
+                  ></v-chip>
+                </v-chip-group>
+              </v-responsive>
+            </div>
+          </v-sheet>
         </div>
-      </v-sheet>
+      </div>
       <div
         class="btn-group-vertical"
         role="group"
@@ -42,63 +55,108 @@
         <Sidebar
           v-model:visible="visibleRight"
           :selectedCardDescription="selectedCardDescription"
-          header="Right Sidebar"
+          header=""
           position="right"
         >
-          <p>선택된 카드의 설명: {{ selectedCardDescription }}</p>
-          <div class="photo_gallery" v-if="slides.length > 0">
-            <!-- 공사 사진 영역 -->
-            <v-carousel
-              height="400"
-              width="100%"
-              cycle
-              hide-delimiter-background
-            >
-              <v-carousel-item v-for="(slide, i) in slides" :key="i">
-                <v-sheet :color="colors[i]" height="100%">
-                  <div class="d-flex fill-height justify-center align-center">
-                    <div class="spotname">{{ slide }}</div>
-                  </div>
-                </v-sheet>
-              </v-carousel-item>
-            </v-carousel>
-          </div>
-          <div v-else>
-            <!-- 슬라이드 로딩 중 표시할 내용 -->
-            <p>Loading...</p>
+          <div class="card-details">
+            <img
+              v-if="selectedCard.imgUrl"
+              :src="selectedCard.imgUrl"
+              alt="Spot Image"
+              style="
+                width: 80%;
+                max-width: 600px;
+                height: 70%;
+                margin-left: 15px;
+              "
+            />
+            <img
+              v-else
+              src="@/assets/images/noimg.png"
+              class="card-img-top"
+              alt="No Image"
+              style="width: 100%; height: 100%; margin-left: 15px"
+            />
+            <div class="card-info-custom">
+              <h2 class="card-info-title">
+                <a
+                  href="#"
+                  @click.prevent="handleClick(selectedCard.spot.id)"
+                  >{{ selectedCard.spot.name }}</a
+                >
+              </h2>
+              <p><strong>주소:</strong> {{ selectedCard.spot.address }}</p>
+              <p><strong>조회수:</strong> {{ selectedCard.spot.views }}</p>
+              <p v-if="selectedCard.spot.homepage">
+                <strong>홈페이지:</strong>
+                <a :href="selectedCard.spot.homepage" target="_blank">{{
+                  selectedCard.spot.homepage
+                }}</a>
+              </p>
+              <p v-else><strong>홈페이지:</strong> 등록된 정보가 없습니다.</p>
+              <p v-if="selectedCard.spot.phone">
+                <strong>전화번호:</strong> {{ selectedCard.spot.phone }}
+              </p>
+              <p v-else><strong>전화번호:</strong> 등록된 정보가 없습니다.</p>
+            </div>
           </div>
         </Sidebar>
-        <button
-          v-for="(card, index) in cards"
-          :key="index"
-          type="button"
-          class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
-          :class="{ active: selectedCard === index }"
-          @click="handleCardClick(card)"
-          style="height: 7rem"
-        >
-          <div
-            class="card d-flex flex-row align-items-center"
-            :class="{ 'border-selected': selectedCard === index }"
-            style="width: 100%; height: 100%"
+        <div v-if="cards.length > 0">
+          <button
+            v-for="(card, index) in cards"
+            :key="index"
+            type="button"
+            class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
+            :class="{ active: selectedCard === index }"
+            @click="handleCardClick(card)"
+            style="height: 7rem; width: 100%"
           >
-            <!-- 이미지를 왼쪽에 위치시킵니다. -->
-            <div class="col-4">
-              <img
-                :src="card.imgSrc"
-                class="card-img-top"
-                alt="..."
-                style="width: 100%; height: 100%; margin-left: 15px"
-              />
-            </div>
-            <!-- 카드 바디를 오른쪽에 배치합니다. -->
+            <!-- 이미지를 왼쪽에 위치시키고 카드 바디를 오른쪽에 배치합니다. -->
             <div
-              class="card-body col-8 d-flex justify-content-center align-items-center"
+              class="card d-flex flex-row align-items-center"
+              :class="{ 'border-selected': selectedCard === index }"
+              style="width: 100%; height: 100%"
             >
-              <p class="card-text">{{ card.description }}</p>
+              <div class="col-4">
+                <!-- 조건부 렌더링 -->
+                <template v-if="card.imgUrl">
+                  <img
+                    :src="card.imgUrl"
+                    class="card-img-top"
+                    alt="..."
+                    style="
+                      width: 130px;
+                      max-width: 100%;
+                      height: 70px;
+                      max-height: 100%;
+                      margin-left: 15px;
+                    "
+                  />
+                </template>
+                <template v-else>
+                  <img
+                    src="@/assets/images/noimg.png"
+                    class="card-img-top"
+                    alt="No Image"
+                    style="
+                      width: 80px;
+                      max-width: 100%;
+                      height: auto;
+                      max-height: 100%;
+                      margin-left: 15px;
+                    "
+                  />
+                </template>
+                <!-- /조건부 렌더링 -->
+              </div>
+              <div
+                class="card-body col-8 d-flex justify-content-center align-items-center"
+              >
+                <p class="card-text">{{ card.spot.name }}</p>
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -293,9 +351,17 @@
 
     <!-- 여행코스 -->
     <div v-else-if="selectedButton === 2">
+      <div class="where-go">누구와 함께하나요?</div>
       <div class="pa-4" style="max-width: 400px">
         <v-chip-group selected-class="text-color" column>
-          <v-chip v-for="t in theme" :key="t"> {{ t }} </v-chip>
+          <v-chip
+            v-for="t in theme"
+            :key="t.id"
+            :text="t.name"
+            :value="t.name"
+            @click="handleChipClickCourse(t.id)"
+          >
+          </v-chip>
         </v-chip-group>
       </div>
       <div
@@ -306,48 +372,110 @@
         <Sidebar
           v-model:visible="visibleRight"
           :selectedCardDescription="selectedCardDescription"
-          header="Right Sidebar"
+          header=""
           position="right"
         >
-          <p>선택된 카드의 설명: {{ selectedCardDescription }}</p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
-          </p>
-        </Sidebar>
-        <button
-          v-for="(card, index) in cards"
-          :key="index"
-          type="button"
-          class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
-          :class="{ active: selectedCard === index }"
-          @click="handleCardClick(card)"
-          style="height: 7rem"
-        >
-          <div
-            class="card d-flex flex-row align-items-center"
-            :class="{ 'border-selected': selectedCard === index }"
-            style="width: 100%; height: 100%"
-          >
-            <!-- 이미지를 왼쪽에 위치시킵니다. -->
-            <div class="col-4">
-              <img
-                :src="card.imgSrc"
-                class="card-img-top"
-                alt="..."
-                style="width: 100%; height: 100%; margin-left: 15px"
-              />
-            </div>
-            <!-- 카드 바디를 오른쪽에 배치합니다. -->
-            <div
-              class="card-body col-8 d-flex justify-content-center align-items-center"
-            >
-              <p class="card-text">{{ card.description }}</p>
+          <div class="card-details">
+            <img
+              v-if="selectedCard.imgUrl"
+              :src="selectedCard.imgUrl"
+              alt="Spot Image"
+              style="
+                width: 80%;
+                max-width: 600px;
+                height: 70%;
+                margin-left: 15px;
+              "
+            />
+            <img
+              v-else
+              src="@/assets/images/noimg.png"
+              class="card-img-top"
+              alt="No Image"
+              style="width: 100%; height: 100%; margin-left: 15px"
+            />
+            <div class="card-info-custom">
+              <h2 class="card-info-title">
+                <a
+                  href="#"
+                  @click.prevent="handleClickCourseCard(selectedCard.id)"
+                  >{{ selectedCard.title }}</a
+                >
+              </h2>
+              <!-- <p><strong>테마:</strong> {{ selectedCard.spot.address }}</p> -->
+              <p><strong>여행기간:</strong> {{ selectedCard.tripPeriod }}</p>
+              <p><strong>조회수:</strong> {{ selectedCard.views }}</p>
+<p>{{ spaces.values }}</p>
+              <!-- <p v-if="selectedCard.spot.homepage">
+                <strong>홈페이지:</strong>
+                <a :href="selectedCard.spot.homepage" target="_blank">{{
+                  selectedCard.spot.homepage
+                }}</a>
+              </p>
+              <p v-else><strong>홈페이지:</strong> 등록된 정보가 없습니다.</p>
+              <p v-if="selectedCard.spot.phone">
+                <strong>전화번호:</strong> {{ selectedCard.spot.phone }}
+              </p>
+              <p v-else><strong>전화번호:</strong> 등록된 정보가 없습니다.</p> -->
             </div>
           </div>
-        </button>
+        </Sidebar>
+        <div v-if="cards.length > 0">
+          <button
+            v-for="(card, index) in cards"
+            :key="index"
+            type="button"
+            class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
+            :class="{ active: selectedCard === index }"
+            @click="handleCourseCardClick(card)"
+            style="height: 7rem; width: 100%"
+          >
+            <!-- 이미지를 왼쪽에 위치시키고 카드 바디를 오른쪽에 배치합니다. -->
+            <div
+              class="card d-flex flex-row align-items-center"
+              :class="{ 'border-selected': selectedCard === index }"
+              style="width: 100%; height: 100%"
+            >
+              <div class="col-4">
+                <!-- 조건부 렌더링 -->
+                <template v-if="card.imgUrl">
+                  <img
+                    :src="card.imgUrl"
+                    class="card-img-top"
+                    alt="..."
+                    style="
+                      width: 130px;
+                      max-width: 100%;
+                      height: 70px;
+                      max-height: 100%;
+                      margin-left: 15px;
+                    "
+                  />
+                </template>
+                <template v-else>
+                  <img
+                    src="@/assets/images/noimg.png"
+                    class="card-img-top"
+                    alt="No Image"
+                    style="
+                      width: 80px;
+                      max-width: 100%;
+                      height: auto;
+                      max-height: 100%;
+                      margin-left: 15px;
+                    "
+                  />
+                </template>
+                <!-- /조건부 렌더링 -->
+              </div>
+              <div
+                class="card-body col-8 d-flex justify-content-center align-items-center"
+              >
+                <p class="card-text">{{ card.title }}</p>
+              </div>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -377,21 +505,22 @@ const guguns = ref([]);
 const selectedAreaName = ref("");
 const selectedGugunName = ref("");
 const buttons = ref(["추천테마", "인기장소", "여행코스", "나의여행"]);
-const selectedButton = ref(0);
+const selectedButton = ref(1);
 const selectedCard = ref(null);
 const selectedCardDescription = ref("");
 const visibleRight = ref(false);
-const tags = ref([
-  "#가족과함께",
-  "#연인과함께",
-  "#반려동물과함께",
-  "#친구와함께",
-  "#가족과함께2",
-  "#연인과함께2",
-  "#반려동물과함께2",
-  "#친구와함께2",
+const markerList = ref([]);
+const spaces = ref([]);
+
+const theme = ref([
+  { name: "가족과함께", id: 1 },
+  { name: "연인과함께", id: 2 },
+  { name: "아기와함께", id: 3 },
+  { name: "반려동물과함께", id: 4 },
+  { name: "친구와함께", id: 5 },
+  { name: "나홀로여행", id: 6 },
+  { name: "어르신과함께", id: 7 },
 ]);
-const theme = ref(["가족과함께", "연인과함께", "반려동물과함께", "친구와함께"]);
 
 const searchResults = ref([]);
 provide("searchResults", searchResults); // Provide searchResults to children
@@ -405,6 +534,8 @@ const categories = ref([
   { name: "🍴 음식점", id: 39 },
 ]);
 const cards = ref([]);
+const hashtags = ref([]);
+const loading = ref(true);
 
 onMounted(() => {
   fetchAreaCodes();
@@ -433,9 +564,64 @@ const handleCardClick = async (card) => {
   }
 };
 
+const handleCourseCardClick = async (card) => {
+  selectedCard.value = card;
+  visibleRight.value = true;
+  console.log(card);
+
+  try {
+    const response = await axios.get(
+      `http://localhost/api/trips/search/${card.id}`
+    );
+    console.log(`http://localhost/api/spots/${card.id}`);
+    selectedCardDescription.value = response.data.data;
+    console.log("click event ", response.data.data);
+    const data = response.data.data;
+
+    const allSpotInfo = [].concat(
+      ...data.schedules.map((schedule) => schedule.spotInfo)
+    );
+
+    const groupedSchedules = data.schedules.reduce((acc, schedule) => {
+      const { dateSequence } = schedule;
+      if (!acc[dateSequence]) {
+        acc[dateSequence] = { items: [], content: data.content[dateSequence - 1] };
+      }
+      acc[dateSequence].items.push(schedule);
+      return acc;
+    }, {});
+
+    // 그룹화된 데이터를 배열로 변환 및 scheduleSequence 순서대로 정렬
+    spaces.value = Object.keys(groupedSchedules).map(dateSequence => {
+      return {
+        title: `Day ${dateSequence}`,
+        items: groupedSchedules[dateSequence].items
+          .sort((a, b) => a.scheduleSequence - b.scheduleSequence)
+          .map(schedule => ({
+            name: schedule.spotInfo.spot.name,
+            address: schedule.spotInfo.spot.address,
+            imgUrl: schedule.spotInfo.spot.imgUrl // imgUrl을 spotInfo.spot에서 가져옴
+          })),
+        content: groupedSchedules[dateSequence].content
+      };
+    });
+
+    // 결과 확인
+    console.log(allSpotInfo);
+    // markerList.value = data.map(trip => trip.schedules.map(schedule => schedule.spotInfo));
+    // console.log(markerList.value);
+    searchStore.setSearchResults(allSpotInfo);
+    searchStore.setDrawLines(true);
+  } catch (error) {
+    console.error("Error fetching card details:", error);
+  }
+};
+
 const fetchAreaCodes = async () => {
   try {
-    const response = await axios.get("http://localhost/api/spots/search/areacode");
+    const response = await axios.get(
+      "http://localhost/api/spots/search/areacode"
+    );
     areas.value = response.data.data;
   } catch (error) {
     console.error("Error fetching area codes:", error);
@@ -484,7 +670,9 @@ const fetchSearchResults = async () => {
     const response = await axios.get(url, { params });
     console.log(url, params);
     const data = response.data.data;
+    console.log("dartataggsg ", data);
     searchStore.setSearchResults(data);
+    searchStore.setDrawLines(false);
     console.log(data);
     // cards 값 설정
     cards.value = data;
@@ -495,24 +683,89 @@ const fetchSearchResults = async () => {
   }
 };
 
-const handleButtonSelect = (index) => {
+const handleButtonSelect = async (index) => {
   selectedButton.value = index;
   if (index === 3) {
     router.push("/makePlan"); // 나의여행 페이지로 이동
+  } else if (index === 0) {
+    try {
+      loading.value = true;
+      const response = await axios.get(
+        "http://localhost/api/spots/search/hashtag?limit=5"
+      );
+      hashtags.value = response.data;
+      console.log("hash ", hashtags.value);
+      loading.value = false;
+    } catch (error) {
+      console.error("Failed to fetch hashtag elements:", error);
+    }
   }
+
   cards.value = [];
+  searchStore.setSearchResults([]);
+  console.log(cards);
 };
 
 const handleClick = async (spotId) => {
   try {
     // API 요청
-    const response = await axios.get(`http://localhost/api/spots/search/${spotId}`);
-    console.log('API 응답:', response.data);
+    const response = await axios.get(
+      `http://localhost/api/spots/search/${spotId}`
+    );
+    console.log("API 응답:", response.data);
 
     // /spotDetail 페이지로 이동
-    router.push({ name: 'spotDetail', params: { id: spotId } });
+    router.push({ name: "spotDetail", params: { id: spotId } });
   } catch (error) {
-    console.error('API 요청 중 오류 발생:', error);
+    console.error("API 요청 중 오류 발생:", error);
+  }
+};
+
+const handleClickCourseCard = async (spotId) => {
+  try {
+    // API 요청
+    const response = await axios.get(
+      `http://localhost/api/trips/search/${spotId}`
+    );
+    console.log("API 응답:", response.data);
+
+    // /spotDetail 페이지로 이동
+    router.push({ name: "spotDetail", params: { id: spotId } });
+  } catch (error) {
+    console.error("API 요청 중 오류 발생:", error);
+  }
+};
+
+const handleChipClick = async (tagId) => {
+  try {
+    const response = await axios.get(
+      `http://localhost/api/spots/search/hashtag/${tagId}`
+    );
+    console.log("API 응답:", response.data);
+    cards.value = response.data.data;
+    console.log(cards.value);
+    searchStore.setSearchResults(response.data.data);
+    searchStore.setDrawLines(false);
+    // 필요한 로직 추가 (예: 결과를 화면에 표시)
+  } catch (error) {
+    console.error("API 요청 중 오류 발생:", error);
+  }
+};
+
+const handleChipClickCourse = async (tagId) => {
+  try {
+    const url = `http://localhost/api/trips/search/theme/${tagId}`;
+    const params = {
+      offset: 0,
+      limit: 10,
+    };
+    const response = await axios.get(url, { params });
+    console.log("API 응답:", response.data);
+    cards.value = response.data.data;
+    console.log("card ", cards.value);
+    // 필요한 로직 추가 (예: 결과를 화면에 표시)
+  } catch (error) {
+    console.error("API 요청 중 오류 발생:", error);
   }
 };
 </script>

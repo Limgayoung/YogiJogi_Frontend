@@ -283,65 +283,44 @@ const addItemToLastSpace = () => {
     lastSpace.items.push(newMarker);
     addMarkerToList(currentMarker.value.lat, currentMarker.value.lng); // 새로운 마커 추가
   }
-};
 
-const updateMarkerListOrder = () => {
-  markerList.value = spaces.value.flatMap((space) =>
-    space.items.map((item) => ({ lat: item.lat, lng: item.lng }))
-  );
-};
+  if (map.value && bounds) {
+    clearMarkers(); // 기존 마커 제거
+    bounds = new kakao.maps.LatLngBounds();
 
-// 드래그로 요소 순서 변경 시 호출되는 함수
-const onDragEnd = () => {
-  updateMarkerListOrder(); // 마커 리스트 순서 업데이트
-};
+    results.forEach((result) => {
+      const point = new kakao.maps.LatLng(result.spot.latitude, result.spot.longitude);
+      const marker = new kakao.maps.Marker({
+        position: point,
+      });
+      marker.setMap(map.value);
+      markers.value.push(marker); // 새로운 마커 저장
+      bounds.extend(point);
+    });
 
-const tabs = ref([{ value: "tab1", text: "1일차", inputText: "" }]);
-const currentTab = ref("tab1");
-const spaces = ref([
-  {
-    title: "1일차",
-    items: [],
-  },
-]);
-
-const addSpace = () => {
-  const newTitle = `${spaces.value.length + 1}일차`;
-  spaces.value.push({ title: newTitle, items: [] });
-  addTab(newTitle); // 새로운 공간 추가 시 탭도 추가
-};
-
-const removeSpace = () => {
-  if (spaces.value.length > 0) {
-    spaces.value.pop(); // 배열의 마지막 항목 제거
-    removeTab();
+    map.value.setBounds(bounds);
   }
 };
 
-const addTab = (title) => {
-  const newTabValue = `tab${tabs.value.length + 1}`;
-  tabs.value.push({ value: newTabValue, text: title, inputText: "" });
-  currentTab.value = newTabValue;
+// 기존 마커 제거 함수
+const clearMarkers = () => {
+  markers.value.forEach(marker => marker.setMap(null));
+  markers.value = []; // 배열 초기화
 };
 
-const removeTab = () => {
-  if (tabs.value.length > 0) {
-    tabs.value.pop(); // 배열의 마지막 탭 제거
+watch(
+  () => searchStore.searchResults,
+  (newResults) => {
+    searchResults.value = newResults;
+    setMarkers(newResults);
   }
-};
+);
 
-const removeItem = (spaceIndex, mealIndex) => {
-  const space = spaces.value[spaceIndex];
-  if (space && space.items) {
-    const removedItem = space.items.splice(mealIndex, 1)[0];
-
-    // markerList에서 해당 마커를 삭제
-    markerList.value = markerList.value.filter(
-      (marker) => !(marker.lat === removedItem.lat && marker.lng === removedItem.lng)
-    );
-
-    // 카카오맵에 실시간으로 반영
-    updateMarkerListOrder();
+// drawLines 상태 감시
+watch(
+  () => searchStore.drawLines,
+  (newValue) => {
+    drawLines.value = newValue;
   }
 };
 
@@ -485,16 +464,16 @@ const spacesWatcher = watch(
 );
 </script>
 
-<style>
+<style scoped>
 @font-face {
   font-family: "GongGothicMedium";
   src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
-
-.container-makeplan {
-  font-family: "GongGothicMedium";
+div {
+  width: 100%;
+  height: 100%;
 }
 
 .container-makeplan {
@@ -581,20 +560,16 @@ const spacesWatcher = watch(
 
 .space-container {
   margin: 10px;
-}
-
-.add-space-btn {
-  margin-bottom: 10px;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
+  padding: 10px 20px;
+  font-size: 14px;
+  background-color: #ffc700;
+  border: none;
+  color: white;
   cursor: pointer;
 }
 
-.add-item-btn {
-  margin-bottom: 10px;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  cursor: pointer;
+.demo-button:hover {
+  background-color: #e0b400;
 }
 
 .space-item {

@@ -1,59 +1,100 @@
 <template>
   <div>
     <div class="kakao-map-wrapper">
-      <KakaoMap width="100%" height="45rem" :lat="33.450701" :lng="126.570667" @onLoadKakaoMap="onLoadKakaoMap" />
+      <KakaoMap
+        width="100%"
+        height="45rem"
+        :lat="33.450701"
+        :lng="126.570667"
+        @onLoadKakaoMap="onLoadKakaoMap"
+      >
+        <!-- Conditionally render Polyline or Markers -->
+        <template v-if="drawLines">
+          <KakaoMapMarkerPolyline
+            :markerList="markerList"
+            :showMarkerOrder="true"
+            strokeColor="#C74C5E"
+            :strokeOpacity="1"
+            strokeStyle="solid"
+          />
+        </template>
+        <template v-else>
+          <KakaoMapMarker
+            v-for="(marker, index) in markerList"
+            :lat="marker.lat"
+            :lng="marker.lng"
+            :infoWindow="marker.infoWindow"
+            :clickable="true"
+            @onClickKakaoMapMarker="onClickMapMarker(marker)"
+          />
+        </template>
+      </KakaoMap>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { KakaoMap } from 'vue3-kakao-maps';
-import { useSearchStore } from '@/stores/searchStore.js';
+import { ref, watch } from "vue";
+import { KakaoMap, KakaoMapMarkerPolyline, KakaoMapMarker } from "vue3-kakao-maps";
+import { useSearchStore } from "@/stores/searchStore.js";
 
-// Pinia 스토어 사용
 const searchStore = useSearchStore();
 const searchResults = ref(searchStore.searchResults);
+const drawLines = ref(searchStore.drawLines);
 
 const map = ref(null);
 let bounds = null;
+const markerList = ref([]);
 
 const onLoadKakaoMap = (mapRef) => {
   map.value = mapRef;
   bounds = new kakao.maps.LatLngBounds();
-  setMarkers(searchResults.value);
+  setMarkers(markerList.value);
 };
 
 const setMarkers = (results) => {
   if (!results || results.length === 0) {
     return;
   }
+
   if (map.value && bounds) {
-    // 기존 마커 제거
     map.value.markers?.forEach(marker => marker.setMap(null));
     bounds = new kakao.maps.LatLngBounds();
 
     results.forEach((result) => {
-      const point = new kakao.maps.LatLng(result.spot.latitude, result.spot.longitude);
-      const marker = new kakao.maps.Marker({
-        position: point,
-      });
-      marker.setMap(map.value);
-      bounds.extend(point);
+      if (result.lat && result.lng) {
+        const point = new kakao.maps.LatLng(result.lat, result.lng);
+        bounds.extend(point);
+      }
     });
-
     map.value.setBounds(bounds);
   }
 };
+
+// const clearMarkers = () => {
+//   markerList.value.forEach((marker) => marker.setMap(null));
+// };
 
 watch(
   () => searchStore.searchResults,
   (newResults) => {
     searchResults.value = newResults;
-    setMarkers(newResults);
+    markerList.value = newResults
+      .map((spot) => ({
+        lat: spot.spot.latitude,
+        lng: spot.spot.longitude,
+      }))
+      .filter((marker) => marker.lat && marker.lng);
+    setMarkers(markerList.value);
   }
 );
 
+watch(
+  () => searchStore.drawLines,
+  (newValue) => {
+    drawLines.value = newValue;
+  }
+);
 </script>
 
 <style scoped>
