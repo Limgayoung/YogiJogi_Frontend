@@ -4,36 +4,60 @@
       <!-- 위에 줄 -->
       <div class="selectInfo">
         <div class="d-flex mb-3">
-          <select v-model="selectedAreaCode" class="form-select custom-width-1-side mr-2"
-            aria-label="Default select example" @change="fetchGugunCodes">
+          <select
+            v-model="selectedAreaCode"
+            class="form-select custom-width-1-side mr-2"
+            aria-label="Default select example"
+            @change="fetchGugunCodes"
+          >
             <option value="" disabled>첫 번째 선택</option>
             <option v-for="area in areas" :key="area.code" :value="area.code">
               {{ area.name }}
             </option>
           </select>
-          <select v-model="selectedGugunCode" class="form-select custom-width-2-side mr-2"
-            aria-label="Default select example">
+          <select
+            v-model="selectedGugunCode"
+            class="form-select custom-width-2-side mr-2"
+            aria-label="Default select example"
+          >
             <option value="" disabled>두 번째 선택</option>
-            <option v-for="gugun in guguns" :key="gugun.code" :value="gugun.code">
+            <option
+              v-for="gugun in guguns"
+              :key="gugun.code"
+              :value="gugun.code"
+            >
               {{ gugun.name }}
             </option>
           </select>
         </div>
         <div class="d-flex">
-          <input type="text" v-model="searchText" class="custom-width-input-side flex-grow-1"
-            placeholder="검색어를 입력하세요" />
-          <button type="button" class="btn btn-primary flex-shrink-0" @click="fetchSearchResults()" style="
+          <input
+            type="text"
+            v-model="searchText"
+            class="custom-width-input-side flex-grow-1"
+            placeholder="검색어를 입력하세요"
+          />
+          <button
+            type="button"
+            class="btn btn-primary flex-shrink-0"
+            @click="fetchSearchResults()"
+            style="
               background-color: #ffb108;
               border-color: #ffb108;
               margin-right: 10px;
-            ">
+            "
+          >
             검색
           </button>
         </div>
       </div>
       <div class="top-btn">
         <v-item-group v-model="selectedCategory" selected-class="bg-yellow">
-          <v-item v-for="(category, index) in categories" :key="index" v-slot="{ selectedClass, toggle }">
+          <v-item
+            v-for="(category, index) in categories"
+            :key="index"
+            v-slot="{ selectedClass, toggle }"
+          >
             <v-chip :class="selectedClass" @click="() => handleCategoryClick(category.id, toggle)">
               {{ category.name }}
             </v-chip>
@@ -41,35 +65,56 @@
         </v-item-group>
       </div>
       <div v-if="cards.length > 0">
-        <button v-for="(card, index) in cards" :key="index" type="button"
+        <button
+          v-for="(card, index) in cards"
+          :key="index"
+          type="button"
           class="btn btn-secondary-card d-flex flex-column justify-content-center align-items-center"
-          :class="{ active: selectedCard === index }" @click="handleCardClick(card)" style="height: 7rem; width: 100%">
+          :class="{ active: selectedCard === index }"
+          @click="handleCardClick(card)"
+          style="height: 7rem; width: 100%"
+        >
           <!-- 이미지를 왼쪽에 위치시키고 카드 바디를 오른쪽에 배치합니다. -->
-          <div class="card d-flex flex-row align-items-center" :class="{ 'border-selected': selectedCard === index }"
-            style="width: 100%; height: 100%">
+          <div
+            class="card d-flex flex-row align-items-center"
+            :class="{ 'border-selected': selectedCard === index }"
+            style="width: 100%; height: 100%"
+          >
             <div class="col-4">
               <!-- 조건부 렌더링 -->
               <template v-if="card.imgUrl">
-                <img :src="card.imgUrl" class="card-img-top" alt="..." style="
+                <img
+                  :src="card.imgUrl"
+                  class="card-img-top"
+                  alt="..."
+                  style="
                     width: 130px;
                     max-width: 100%;
                     height: 70px;
                     max-height: 100%;
                     margin-left: 15px;
-                  " />
+                  "
+                />
               </template>
               <template v-else>
-                <img src="@/assets/images/noimg.png" class="card-img-top" alt="No Image" style="
+                <img
+                  src="@/assets/images/noimg.png"
+                  class="card-img-top"
+                  alt="No Image"
+                  style="
                     width: 80px;
                     max-width: 100%;
                     height: auto;
                     max-height: 100%;
                     margin-left: 15px;
-                  " />
+                  "
+                />
               </template>
               <!-- /조건부 렌더링 -->
             </div>
-            <div class="card-body col-8 d-flex justify-content-center align-items-center">
+            <div
+              class="card-body col-8 d-flex justify-content-center align-items-center"
+            >
               <p class="card-text">{{ card.spot.name }}</p>
             </div>
           </div>
@@ -79,24 +124,46 @@
 
     <div class="middle-box">
       <div class="kakao-map-wrapper">
-        <KakaoMap width="100%" height="45rem" :lat="mapCenter.lat" :lng="mapCenter.lng">
-          <KakaoMapMarkerPolyline :markerList="markerList" :showMarkerOrder="true" strokeColor="#C74C5E"
-            :strokeOpacity="1" strokeStyle="solid" v-if="markerList.length > 0" />
-          <KakaoMapMarker :lat="currentMarker.lat" :lng="currentMarker.lng"
-            @onClickKakaoMapMarker="onClickKakaoMapMarker" :clickable="true" />
-          <KakaoMapCustomOverlay :lat="infoWindow.lat" :lng="infoWindow.lng" :yAnchor="1.4">
+        <KakaoMap
+          width="100%"
+          height="45rem"
+          :lat="mapCenter.lat"
+          :lng="mapCenter.lng"
+        >
+          <KakaoMapMarkerPolyline
+            :markerList="markerList"
+            :showMarkerOrder="true"
+            strokeColor="#C74C5E"
+            :strokeOpacity="1"
+            strokeStyle="solid"
+            v-if="markerList.length > 0"
+          />
+          <KakaoMapMarker
+            :lat="currentMarker.lat"
+            :lng="currentMarker.lng"
+            @onClickKakaoMapMarker="onClickKakaoMapMarker"
+            :clickable="true"
+          />
+          <KakaoMapCustomOverlay
+            :lat="infoWindow.lat"
+            :lng="infoWindow.lng"
+            :yAnchor="1.4"
+          >
             <div class="info-window">
               <!-- 인포 윈도우의 내용을 여기에서 사용자 정의할 수 있습니다 -->
               <div style="font-size: 15px">{{ infoWindow.title }}</div>
               <div style="font-size: 13px">{{ infoWindow.address }}</div>
               <!-- <span style="float: right; cursor: pointer" @click="closeOverlay" title="닫기">X</span> -->
-              <button @click="addItemToLastSpace" style="
+              <button
+                @click="addItemToLastSpace"
+                style="
                   font-size: 13px;
                   background-color: #ffc700;
                   border: none;
                   padding: 5px;
                   cursor: pointer;
-                ">
+                "
+              >
                 여행지 추가
               </button>
             </div>
@@ -107,48 +174,62 @@
 
     <div class="right-box">
       <div class="space-container">
-        <div><input v-model="tripTitle" class="title-input" placeholder="제목을 입력하세요" /></div>
-        <div class="button-group">
-          <v-btn @click="addSpace" class="add-space-btn" style="margin-right: 10px; background-color: #ffc700">일차
-            추가</v-btn>
-          <!-- <v-btn
-          @click="addItemToLastSpace"
-          class="add-item-btn"
-          style="margin-right: 10px; background-color: #ffc700"
-          >여행지 추가</v-btn
-        > -->
-          <v-btn @click="removeSpace" class="add-space-btn" style="margin-right: 10px; background-color: #ffc700">
-            일차 삭제
-          </v-btn>
-
-          <!-- tripTheme 드롭다운 선택자 추가 -->
-          <select v-model="selectedThemeId" class="form-select custom-width-triptheme theme-select" aria-label="테마 선택">
-            <option :value="테마" disabled>테마</option>
-            <option v-for="theme in themes" :key="theme.id" :value="theme.id">                            
+        <div class="d-flex align-items-center">
+          <input v-model="tripTitle" class="title-input" placeholder="제목을 입력하세요" />
+          <select v-model="selectedThemeId" class="form-select theme-select ml-2" aria-label="테마 선택">
+            <option :value="null" disabled>테마</option>
+            <option v-for="theme in themes" :key="theme.id" :value="theme.id">
               {{ theme.name }}
             </option>
           </select>
-
-          <v-btn @click="postInitTrip" class="add-item-btn"
-            style="margin-right: 10px; background-color: #ffc700">등록</v-btn>
         </div>
+        <div class="button-group">
+          <v-btn
+            @click="addSpace"
+            class="add-space-btn"
+            style="background-color: #ffc700"
+          >일정 추가</v-btn>
+          <v-btn
+            @click="removeSpace"
+            class="add-space-btn"
+            style="background-color: #ffc700"
+          >일정 삭제</v-btn>
+          <v-btn
+            @click="postInitTrip"
+            class="add-item-btn"
+            style="background-color: #ffc700"
+          >등록</v-btn>
+        </div>
+        
         <div v-for="(space, index) in spaces" :key="index" class="space-item">
           <h1>{{ space.title }}</h1>
-          <draggable v-model="space.items" tag="ul" group="meals" class="draggable-list" :itemKey="(item) => item.name"
-            @end="onDragEnd">
+          <draggable
+            v-model="space.items"
+            tag="ul"
+            group="meals"
+            class="draggable-list"
+            :itemKey="(item) => item.name"
+            @end="onDragEnd"
+          >
             <template #item="{ element: meal, index: mealIndex }">
-              <li style="
+              <li
+                style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                ">
+                "
+              >
                 {{ meal.name }}
-                <v-btn icon @click="removeItem(index, mealIndex)" style="
+                <v-btn
+                  icon
+                  @click="removeItem(index, mealIndex)"
+                  style="
                     background-color: #ffc700;
                     color: white;
                     width: 25px;
                     height: 25px;
-                  ">
+                  "
+                >
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </li>
@@ -166,7 +247,11 @@
 
         <v-card-text>
           <v-tabs-window v-model="currentTab">
-            <v-tabs-window-item v-for="tab in tabs" :key="tab.value" :value="tab.value">
+            <v-tabs-window-item
+              v-for="tab in tabs"
+              :key="tab.value"
+              :value="tab.value"
+            >
               <input v-model="tab.inputText" placeholder="내용을 입력하세요" />
             </v-tabs-window-item>
           </v-tabs-window>
@@ -215,16 +300,15 @@ const categories = ref([
 ]);
 const tripTitle = ref("");
 const themes = ref([
-  { name: "가족과함께", id: 1 },
-  { name: "연인과함께", id: 2 },
-  { name: "아기와함께", id: 3 },
-  { name: "반려동물과함께", id: 4 },
-  { name: "친구와함께", id: 5 },
-  { name: "나홀로여행", id: 6 },
-  { name: "어르신과함께", id: 7 },
+  { name: "가족과 함께", id: 1 },
+  { name: "연인과 함께", id: 2 },
+  { name: "아기와 함께", id: 3 },
+  { name: "반려동물과 함께", id: 4 },
+  { name: "친구와 함께", id: 5 },
+  { name: "나홀로 여행", id: 6 },
+  { name: "어르신과 함께", id: 7 },
 ]);
-
-const selectedThemeId = ref("");
+const selectedThemeId = ref(null);
 
 watch(markerList, (newVal) => {
   // console.log("Marker list updated:", newVal);
@@ -270,7 +354,7 @@ const addMarkerToList = (lat, lng) => {
 };
 
 const addItemToLastSpace = () => {
-  console.log('addItemToLastSpace spaces : ', spaces.value);
+  console.log('addItemToLastSpace spaces : ',spaces.value);
   const lastSpace = spaces.value[spaces.value.length - 1];
   if (lastSpace) {
     const newMarker = {
@@ -283,44 +367,65 @@ const addItemToLastSpace = () => {
     lastSpace.items.push(newMarker);
     addMarkerToList(currentMarker.value.lat, currentMarker.value.lng); // 새로운 마커 추가
   }
+};
 
-  if (map.value && bounds) {
-    clearMarkers(); // 기존 마커 제거
-    bounds = new kakao.maps.LatLngBounds();
+const updateMarkerListOrder = () => {
+  markerList.value = spaces.value.flatMap((space) =>
+    space.items.map((item) => ({ lat: item.lat, lng: item.lng }))
+  );
+};
 
-    results.forEach((result) => {
-      const point = new kakao.maps.LatLng(result.spot.latitude, result.spot.longitude);
-      const marker = new kakao.maps.Marker({
-        position: point,
-      });
-      marker.setMap(map.value);
-      markers.value.push(marker); // 새로운 마커 저장
-      bounds.extend(point);
-    });
+// 드래그로 요소 순서 변경 시 호출되는 함수
+const onDragEnd = () => {
+  updateMarkerListOrder(); // 마커 리스트 순서 업데이트
+};
 
-    map.value.setBounds(bounds);
+const tabs = ref([{ value: "tab1", text: "1일차", inputText: "" }]);
+const currentTab = ref("tab1");
+const spaces = ref([
+  {
+    title: "1일차",
+    items: [],
+  },
+]);
+
+const addSpace = () => {
+  const newTitle = `${spaces.value.length + 1}일차`;
+  spaces.value.push({ title: newTitle, items: [] });
+  addTab(newTitle); // 새로운 공간 추가 시 탭도 추가
+};
+
+const removeSpace = () => {
+  if (spaces.value.length > 0) {
+    spaces.value.pop(); // 배열의 마지막 항목 제거
+    removeTab();
   }
 };
 
-// 기존 마커 제거 함수
-const clearMarkers = () => {
-  markers.value.forEach(marker => marker.setMap(null));
-  markers.value = []; // 배열 초기화
+const addTab = (title) => {
+  const newTabValue = `tab${tabs.value.length + 1}`;
+  tabs.value.push({ value: newTabValue, text: title, inputText: "" });
+  currentTab.value = newTabValue;
 };
 
-watch(
-  () => searchStore.searchResults,
-  (newResults) => {
-    searchResults.value = newResults;
-    setMarkers(newResults);
+const removeTab = () => {
+  if (tabs.value.length > 0) {
+    tabs.value.pop(); // 배열의 마지막 탭 제거
   }
-);
+};
 
-// drawLines 상태 감시
-watch(
-  () => searchStore.drawLines,
-  (newValue) => {
-    drawLines.value = newValue;
+const removeItem = (spaceIndex, mealIndex) => {
+  const space = spaces.value[spaceIndex];
+  if (space && space.items) {
+    const removedItem = space.items.splice(mealIndex, 1)[0];
+
+    // markerList에서 해당 마커를 삭제
+    markerList.value = markerList.value.filter(
+      (marker) => !(marker.lat === removedItem.lat && marker.lng === removedItem.lng)
+    );
+
+    // 카카오맵에 실시간으로 반영
+    updateMarkerListOrder();
   }
 };
 
@@ -331,7 +436,7 @@ const fetchSearchResults = async () => {
       areaCode: selectedAreaCode.value,
       gunguCode: selectedGugunCode.value,
       title: searchText.value,
-      contentTypeId: selectedCategoryContentId.value,
+      contentTypeId : selectedCategoryContentId.value,
       offset: 0,
       limit: 15
     };
@@ -342,7 +447,7 @@ const fetchSearchResults = async () => {
     // console.log(url, params);
     const data = response.data.data;
 
-    console.log('response data: ', data);
+    console.log('response data: ',data);
     // cards 값 설정
     cards.value = data;
     // console.log(cards.value);
@@ -378,9 +483,9 @@ const fetchGugunCodes = async () => {
 const postInitTrip = async () => {
   try {
     const data = makeRequestData();
-    console.log('post init trip request data: ', data);
-    console.log('jwtToken: ', userStore.jwtToken);
-    console.log('accessToken: ', userStore.jwtToken.accessToken);
+    console.log('post init trip request data: ',data);
+    console.log('jwtToken: ',userStore.jwtToken);
+    console.log('accessToken: ',userStore.jwtToken.accessToken);
     const response = await axios.post(
       `http://localhost/api/trips/`,
       data,
@@ -391,10 +496,10 @@ const postInitTrip = async () => {
         }
       }
     );
-
-    console.log('post 후 응답 response: ', response.data.data);
-    alert('여행 코스 등록이 완료되었습니다.');
-    router.push({ name: 'planDetail', params: { id: response.data.data } })
+      
+    console.log('post 후 응답 response: ',response.data.data);
+    alert('여행 코스 등록이 완료되었습니다.');        
+    router.push({ name: 'planDetail', params: { id: response.data.data }})
     // console.log("Gugun codes fetched:", guguns.value);
   } catch (error) {
     console.error("Error post init trip codes:", error);
@@ -406,8 +511,9 @@ const makeRequestData = () => {
   const title = tripTitle.value; // 실제 제목으로 교체 필요
   const tripPeriod = spaces.value.length; // 일정의 일수로 설정
   const content = tabs.value.map(tab => tab.inputText); // 각 탭의 입력된 내용을 배열로 변환
-  const tripThemeId = 1; // 실제 테마 ID로 교체 필요
-
+  console.log(selectedThemeId);
+  const tripThemeId = selectedThemeId.value; // 선택된 테마 ID 설정
+  
   const schedules = spaces.value.flatMap((space, dateSequence) =>
     space.items.map((item, scheduleSequence) => ({
       dateSequence: dateSequence + 1,
@@ -418,7 +524,7 @@ const makeRequestData = () => {
 
   //console.log('spaces: ',spaces.value);
   // console.log('schedules: ',schedules);
-
+  
 
   return {
     userId,
@@ -464,49 +570,42 @@ const spacesWatcher = watch(
 );
 </script>
 
-<style scoped>
+<style>
 @font-face {
   font-family: "GongGothicMedium";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff") format("woff");
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicMedium.woff")
+    format("woff");
   font-weight: normal;
   font-style: normal;
 }
-div {
-  width: 100%;
-  height: 100%;
+
+.container-makeplan {
+  font-family: "GongGothicMedium";
 }
 
 .container-makeplan {
   display: flex;
-  height: 90vh;
-  /* 컨테이너를 화면의 높이만큼 설정합니다. */
+  height: 90vh; /* 컨테이너를 화면의 높이만큼 설정합니다. */
   padding: 10px;
 }
 
 .left-box {
-  flex: 1;
-  /* 왼쪽 박스 */
+  flex: 1; /* 왼쪽 박스 */
   border: 1px solid rgb(185, 184, 184);
-  overflow-y: auto;
-  /* 세로 스크롤을 활성화합니다. */
+  overflow-y: auto; /* 세로 스크롤을 활성화합니다. */
 }
 
 .middle-box {
-  flex: 2;
-  /* 가운데 박스 */
-  margin: 0 10px;
-  /* 가운데 박스를 좌우로 조금씩 여백을 줍니다. */
+  flex: 2; /* 가운데 박스 */
+  margin: 0 10px; /* 가운데 박스를 좌우로 조금씩 여백을 줍니다. */
   border: 1px solid rgb(185, 184, 184);
-  overflow-y: auto;
-  /* 세로 스크롤을 활성화합니다. */
+  overflow-y: auto; /* 세로 스크롤을 활성화합니다. */
 }
 
 .right-box {
-  flex: 1;
-  /* 오른쪽 박스 */
+  flex: 1; /* 오른쪽 박스 */
   border: 1px solid rgb(185, 184, 184);
-  overflow-y: auto;
-  /* 세로 스크롤을 활성화합니다. */
+  overflow-y: auto; /* 세로 스크롤을 활성화합니다. */
 }
 
 .custom-width-input-side {
@@ -560,16 +659,20 @@ div {
 
 .space-container {
   margin: 10px;
-  padding: 10px 20px;
-  font-size: 14px;
-  background-color: #ffc700;
-  border: none;
-  color: white;
+}
+
+.add-space-btn {
+  margin-bottom: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 
-.demo-button:hover {
-  background-color: #e0b400;
+.add-item-btn {
+  margin-bottom: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 .space-item {
@@ -602,52 +705,29 @@ div {
 }
 
 .title-input {
-  flex-grow: 1;
-  /* 입력란이 가능한 한 넓어지도록 설정 */
+  /*flex-grow: 1;  입력란이 가능한 한 넓어지도록 설정 */
+  width: 200px;
   height: 50px;
-  padding: 5px;
-  /* 여백 추가 */
-  font-size: 1.2rem;
-  /* 글자 크기 조정 */
+  padding: 5px; /* 여백 추가 */
+  font-size: 1.2rem; /* 글자 크기 조정 */
   margin-bottom: 10px;
 }
 
-.custom-width-triptheme {
-  width: 100%;
-  height: 50px;
-  margin-bottom: 10px;
-}
-
-.title-input {
-  flex-grow: 1;
-  /* 입력란이 가능한 한 넓어지도록 설정 */
-  height: 50px;
-  padding: 5px;
-  /* 여백 추가 */
-  font-size: 1.2rem;
-  /* 글자 크기 조정 */
-  margin-bottom: 10px;
+.theme-selector {
+  width: 100%; /* 선택자의 너비를 100%로 설정 */
+  margin-bottom: 10px; /* 아래 여백 추가 */
 }
 
 .button-group {
   display: flex;
   align-items: center;
+  gap: 10px; /* 버튼 간격을 10px로 설정 */
 }
 
-.button-group .theme-select {
+.theme-select {
+  flex-shrink: 0;
+  width: 100px; /* 선택자의 너비를 설정 */
   margin-left: 10px;
-  margin-right: 10px;
-  flex-grow: 1;
-  width: 50px; /* auto로 설정하여 콘텐츠 크기에 맞추기 */
-  height: 38px; /* 버튼과 동일한 높이 */
-  padding: 5px 10px; /* 패딩 추가 */
-  font-size: 1rem; /* 글자 크기 조정 */
-  margin-right: 10px; /* 오른쪽 여백 추가 */
-  border-radius: 4px; /* 모서리 둥글게 */
-  border: 1px solid #ccc; /* 테두리 추가 */
 }
 
-.button-group .register-btn {
-  height: 50px;
-}
 </style>
