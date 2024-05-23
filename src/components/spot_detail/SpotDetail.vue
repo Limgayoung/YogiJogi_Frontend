@@ -129,7 +129,7 @@
                   :key="index"
                 >
                   <img
-                    :src="image"
+                    :src="image.originUrl"
                     class="spot Image"
                     style="object-fit: contain; width: 100%; height: 100%"
                   />
